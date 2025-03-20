@@ -2,7 +2,7 @@ import hashlib
 import subprocess
 import os
 
-def check_and_install_new_dependancies(requirements_file="requirements.txt", hash_file=".requirements_hash") -> None:
+def check_and_install_new_dependencies(requirements_file="requirements.txt", hash_file=".requirements_hash") -> None:
     """
     Checks for changes in requirements.txt and installs dependencies if changes are detected.
 
