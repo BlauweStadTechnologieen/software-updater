@@ -3,7 +3,7 @@ import hashlib
 import os
 from directories_to_update import directories_to_update
 from pathlib import Path
-from install_new_dependancies import check_and_install_new_dependancies
+from install_new_dependencies import check_and_install_new_dependencies
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,10 +24,10 @@ def directory_validation(cwd:str) -> bool:
         return True
     
     except FileNotFoundError as e:
-        custom_message = f"Whoops {e}"
+        custom_message = f"FileNotFoundError {e}"
 
     except Exception as e:
-        custom_message = f"Whoops {e}"
+        custom_message = f"Exception {e}"
 
     if custom_message:
         print(custom_message)
@@ -35,31 +35,36 @@ def directory_validation(cwd:str) -> bool:
     return False
 
 def install_updates(cwd: str = None) -> bool:
-    """Checks for remote commits and updates the local repository if needed."""
+    """Checks for new commits and dependancies in the remote repo by checking the status of the branch after fetching any new commits from the repo.
+    If there are updates available, it will run the 'git pull' command before checking for any new dependancies in the 'requirements.txt' file.
+    If there are any new dependacies, it will autmatically installs them"""
 
     if not directory_validation(cwd):
         print("Invalid directory")
         return False
 
-    def run_git_command(command: list, error_message: str):
-        result = run_command(command, cwd)
-        if result.returncode != 0:
-            print(f"{error_message}: {result.stderr if result.stderr else result.returncode}")
-            return False
-        return result
-
-    if not (result := run_git_command(["git", "fetch"], "Git Fetch Error")):
+    result = run_command(["git", "fetch"], cwd)
+    
+    if result.returncode != 0:
+        print(result.stderr)
         return False
 
-    if not (result := run_git_command(["git", "status"], "Git Status Error")):
+    result = run_command(["git", "status"], cwd)
+    
+    if result.returncode != 0:
+        print(result.stderr)
         return False
 
-    # Pull if needed
     if "Your branch is behind" in result.stdout:
-        if not (pull_result := run_git_command(["git", "pull"], "Git Pull Error")):
+        
+        result = run_command(["git", "pull"], cwd)
+
+        if result.returncode != 0:
+            print(result.stderr)
             return False
-        print("Pull complete")
-        check_and_install_new_dependancies()
+        
+        print("New changes detected")
+        check_and_install_new_dependencies()
 
     return True
 
@@ -77,8 +82,3 @@ def check_for_updates():
 
 if __name__ == "__main__":
     check_for_updates()
-    
-        
-
-   
-
