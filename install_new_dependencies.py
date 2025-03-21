@@ -1,6 +1,7 @@
 import hashlib
 import subprocess
 import os
+import freshdesk_ticket
 
 def check_and_install_new_dependencies(requirements_file="requirements.txt", hash_file=".requirements_hash") -> None:
     """
@@ -47,3 +48,4 @@ def check_and_install_new_dependencies(requirements_file="requirements.txt", has
             custom_message = f"Failed to install dependencies: {e}"
             custom_subject = "Dependancy installation failure"
             print(f"Failed to install dependencies: {e} {custom_message}{custom_subject}")
+            freshdesk_ticket.create_freshdesk_ticket(custom_message,custom_subject)
