@@ -5,6 +5,7 @@ from directories_to_update import directories_to_update
 from pathlib import Path
 from install_new_dependencies import check_and_install_new_dependencies
 from dotenv import load_dotenv
+import freshdesk_ticket
 
 load_dotenv()
 
@@ -24,7 +25,7 @@ def directory_validation(cwd:str) -> bool:
         return True
     
     except FileNotFoundError as e:
-        custom_message = f"FileNotFoundError {e}"
+        custom_message = f"FileNotFoundError {e} for Directory {cwd}"
 
     except Exception as e:
         custom_message = f"Exception {e}"
@@ -39,32 +40,32 @@ def install_updates(cwd: str = None) -> bool:
     If there are updates available, it will run the 'git pull' command before checking for any new dependancies in the 'requirements.txt' file.
     If there are any new dependacies, it will autmatically installs them"""
 
+    def handle_error(message:str) -> bool:
+        print(f"Installation Update Error {message}")
+        freshdesk_ticket.create_freshdesk_ticket(message, "Installation Update Error")
+        return False
+    
     if not directory_validation(cwd):
-        print("Invalid directory")
-        return False
-
-    result = run_command(["git", "fetch"], cwd)
+        return handle_error(f"The directory {cwd} is not valid. Please double-check the validity of the directory and try again. We apologise for the inconvenience caused. No, we are not Indian!")
     
-    if result.returncode != 0:
-        print(result.stderr)
-        return False
-
-    result = run_command(["git", "status"], cwd)
+    commands = {
+        "fetch"  : ["git", "fetch"],
+        "status" : ["git", "status"],
+        "pull"   : ["git", "pull"]   
+    }
     
-    if result.returncode != 0:
-        print(result.stderr)
-        return False
-
-    if "Your branch is behind" in result.stdout:
-        
-        result = run_command(["git", "pull"], cwd)
-
+    for cmd_name, cmd_args in commands.items():
+        result = run_command(cmd_args, cwd)
         if result.returncode != 0:
-            print(result.stderr)
-            return False
+            return handle_error(f"Git {cmd_name.capitalize()} Error # {result.returncode}.")
         
-        print("New changes detected")
-        check_and_install_new_dependencies()
+        if cmd_name == "status" and "Your branch is behind" in result.stdout:
+            result = run_command(commands["pull"], cwd)
+            if result.returncode != 0:
+                return handle_error(f"Git Pull Error {result.returncode} {result.stdout}")
+   
+            print("New changes detected")
+            check_and_install_new_dependencies()
 
     return True
 
