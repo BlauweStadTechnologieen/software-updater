@@ -50,8 +50,8 @@ def install_updates(cwd: str = None) -> bool:
     
     commands = {
         "fetch"  : ["git", "fetch"],
-        "status" : ["git", "status"],
-        "pull"   : ["git", "pull"]   
+        "status" : ["git", "status"]
+        # Note: "pull" is not included here, as it is conditionally executed based on "status" output.
     }
     
     for cmd_name, cmd_args in commands.items():
@@ -60,10 +60,11 @@ def install_updates(cwd: str = None) -> bool:
             return handle_error(f"Git {cmd_name.capitalize()} Error # {result.returncode}.")
         
         if cmd_name == "status" and "Your branch is behind" in result.stdout:
-            result = run_command(commands["pull"], cwd)
+
+            result = run_command(["git","pull"], cwd)
             if result.returncode != 0:
                 return handle_error(f"Git Pull Error {result.returncode} {result.stdout}")
-   
+
             print("New changes detected")
             check_and_install_new_dependencies()
 
