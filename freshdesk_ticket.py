@@ -2,13 +2,17 @@ import json as j
 import requests as r
 import os
 from dotenv import load_dotenv
-import settings_mapper
 
 load_dotenv()
 
 FRESHDESK_CREDENTIALS = {
     "FRESHDESK_DOMAIN" : os.getenv("FRESHDESK_DOMAIN"),
     "FRESHDESK_API_KEY": os.getenv("FRESHDESK_API_KEY")
+}
+
+MESSAGING_METADATA = {
+    "REQUESTER_NAME" : os.getenv("REQUESTER_NAME"),
+    "REQUESTER_EMAIL": os.getenv("REQUESTER_EMAIL")
 }
 
 def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_id:int = 201000039106, responder_id:int = 201002411183) -> int:
@@ -24,7 +28,7 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
     API_URL = f'https://{FRESHDESK_CREDENTIALS["FRESHDESK_DOMAIN"]}.freshdesk.com/api/v2/tickets/'
 
     description = f"""
-    Dear {settings_mapper.MESSAGING_METADATA["REQUESTER_NAME"]}<br>
+    Dear {MESSAGING_METADATA["REQUESTER_NAME"]}<br>
     A support ticket has been automatically generated because of the following error or exception message:<br><br>
     {exception_or_error_message}<br><br>
     ===================================================
@@ -38,8 +42,8 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
         'group_id'    : group_id,
         'responder_id': responder_id,
         'requester'   : {
-            'name'    : settings_mapper.MESSAGING_METADATA["REQUESTER_NAME"],
-            'email'   : settings_mapper.MESSAGING_METADATA["REQUESTER_EMAIL"]
+            'name'    : MESSAGING_METADATA["REQUESTER_NAME"],
+            'email'   : MESSAGING_METADATA["REQUESTER_EMAIL"]
         } 
     }
 
