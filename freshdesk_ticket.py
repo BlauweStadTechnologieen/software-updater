@@ -74,11 +74,11 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
             
             ticket_info = response.json
             ticket_id   = ticket_info.get("id")
+            return ticket_id
 
         else:
             custom_message = f"Error code: {response.status_code} Error HTTP response: {response.text} Error response {response.content}"
 
     if custom_message:
         print(custom_message)
-
-    return ticket_id
+        return None
