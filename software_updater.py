@@ -1,9 +1,8 @@
 import subprocess
 import os
-from software_packages_to_update import software_packages_to_update
-from pathlib import Path
 from install_new_dependencies import check_and_install_new_dependencies
 from dotenv import load_dotenv
+from pathlib import Path
 from error_handler import global_error_handler
 import send_message as message
 
@@ -22,7 +21,14 @@ def directory_validation(cwd:str) -> bool:
     
     try:
         os.chdir(cwd)
-        return True
+        print("You should not see this message")
+        directory_contents = os.listdir(cwd)
+        
+        if ".git" in directory_contents:
+            return True
+        else:
+            print(f"The {cwd} is unfortunatley not a git repo")
+            return global_error_handler(f"{error_message_type}",f"This is not a local git repository. Please navigate to {cwd} and run 'git init' to initialise the folder.")
     
     except FileNotFoundError as e:
         return global_error_handler(f"{error_message_type} FileNotFound Error", f"FileNotFoundError {e} for Directory {cwd}")
@@ -64,19 +70,40 @@ def install_updates(cwd: str = None) -> bool:
 
 def check_for_updates():
 
-    software_packages           = software_packages_to_update()
-    base_directory              = BASE_DIRECTORY_ENV["BASE_DIRECTORY"]
-    updated_software_packages   = []
-    
-    for software_package in software_packages:
+    try:
         
-        cwd = str(Path(base_directory) / software_package)
+        base_directory              = BASE_DIRECTORY_ENV["BASE_DIRECTORY"]
         
-        if not install_updates(cwd):
-            continue
+        if not base_directory:
+            raise KeyError("BASE_DIRECTORY key not found in BASE_DIRECTORY_ENV.")
 
-        updated_software_packages.append(software_package)
+        if not os.path.isdir(base_directory):
+            raise FileNotFoundError(f"Base directory '{base_directory}' does not exist") 
+        
+        updated_software_packages   = []
+    
+        for software_package in os.listdir(base_directory):
+                    
+            cwd = os.path.join(base_directory, software_package)
+            
+            if not install_updates(cwd):
+                continue
+
+            updated_software_packages.append(software_package)
+        
         message.send_message(updated_software_packages)
+
+    except KeyError as e:
+
+        return global_error_handler("Key Error", f"{e}")
+    
+    except FileNotFoundError as e:
+
+        return global_error_handler("File Not Found Error", f"{e}")
+    
+    except Exception as e:
+
+        return global_error_handler("Error","f{e}")
 
 if __name__ == "__main__":
     check_for_updates()
