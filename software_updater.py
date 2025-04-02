@@ -5,6 +5,7 @@ from pathlib import Path
 from install_new_dependencies import check_and_install_new_dependencies
 from dotenv import load_dotenv
 from error_handler import global_error_handler
+import send_message as message
 
 load_dotenv()
 
@@ -75,7 +76,7 @@ def check_for_updates():
             continue
 
         updated_software_packages.append(software_package)
-        print(updated_software_packages)
+        message.send_message(updated_software_packages)
 
 if __name__ == "__main__":
     check_for_updates()
