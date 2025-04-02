@@ -76,7 +76,8 @@ def check_for_updates():
             continue
 
         updated_software_packages.append(software_package)
-        message.send_message(updated_software_packages)
+        
+    message.send_message(updated_software_packages)
 
 if __name__ == "__main__":
     check_for_updates()
