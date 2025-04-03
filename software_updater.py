@@ -107,11 +107,6 @@ def check_for_updates():
 
     updated_software_packages = []
 
-<<<<<<< HEAD
-        updated_software_packages.append(software_package)
-        
-    message.send_message(updated_software_packages)
-=======
     if base_directory_validation():
         
         try:
@@ -135,7 +130,6 @@ def check_for_updates():
             generate_support_ticket("Error in checking for updates", f"Unfortunately, there was an error in checking for updates. Please find the folloiwng error message {e}")
             
             return
->>>>>>> update-each-folder-in-directory
 
 if __name__ == "__main__":
     check_for_updates()
