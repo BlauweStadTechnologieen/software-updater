@@ -22,26 +22,20 @@ def base_directory_validation() -> bool:
     try:
     
         if not base_directory:
-            raise KeyError(f"The specified base directory of {base_directory} key is missing")
+            raise KeyError(f"Please specify a base directory in the '.env' file.")
 
         if not os.path.isdir(base_directory):
             raise FileNotFoundError(f"Base directory '{base_directory}' does not exist") 
         
     except KeyError as e:
         
-        global_error_handler(f"Base Directory Key Error","The key for the base directory env is either incorrect or missing. Please check for validation {e}")
+        global_error_handler(f"Base Directory Key Error",f"The key for the base directory .env is missing. {e}")
         
         return False
 
     except FileNotFoundError as e:
         
-        global_error_handler("Base Directory Existence", f"Unfortunately we unable to find the {base_directory} on the system {e}")
-        
-        return False
-
-    except Exception as e:
-        
-        global_error_handler("Base Directory General Exception", f"{e}")
+        global_error_handler("Invalid base directory", f"Unfortunately we unable to find the {base_directory} on the system. - {e}")
         
         return False
     
@@ -62,7 +56,7 @@ def directory_validation(cwd:str) -> bool:
             return True
         
         else:
-           
+                       
             global_error_handler(f"{error_message_type}",f"This is not a local git repository. Please navigate to {cwd} and run 'git init' to initialise the folder.")
             
             return False
@@ -74,8 +68,8 @@ def directory_validation(cwd:str) -> bool:
         return False
 
     except Exception as e:
-        
-        global_error_handler(f"{error_message_type} Exception Error", f"Exception{e}")
+
+        global_error_handler(f"{error_message_type} Exception Error", f"Exception - {e}")
         
         return False
 
@@ -85,7 +79,10 @@ def install_updates(cwd: str = None) -> bool:
     If there are any new dependacies, it will autmatically installs them"""
     
     error_message_type = "Update Installation Error"
-        
+    
+    if not directory_validation(cwd):
+        return False
+    
     commands = {
         "fetch"  : ["git", "fetch"],
         "status" : ["git", "status"]
@@ -140,8 +137,8 @@ def check_for_updates():
                 message.send_message(updated_software_packages)
 
         except Exception as e:
-            
-            generate_support_ticket("Error in checking for updates", f"Unfortunately, there was an error in checking for updates. Please find the folloiwing error message {e}")
+                        
+            generate_support_ticket("Error in checking for updates", f"Unfortunately, there was an error in checking for updates. Please find the following error message {e}")
             
             return
 
