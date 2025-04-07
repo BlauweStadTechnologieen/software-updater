@@ -1,17 +1,19 @@
 import hashlib
 import subprocess
 import os
-import freshdesk_ticket
+import error_handler
 
-def check_and_install_new_dependencies(requirements_file="requirements.txt", hash_file=".requirements_hash") -> None:
+def check_and_install_new_dependencies(requirements_file:str ="requirements.txt", hash_file=".requirements_hash") -> None:
     """
-    Checks for changes in requirements.txt and installs dependencies if changes are detected.
+    After it checks for the existece of the file denoted in the `requreiments_file` arguement, it then checks for changes in requirements.txt file and installs dependencies if changes are detected. This is achieved by detetching any changes in the `current_hash` file. If this differt from the previous hash, it executes the script.
 
-    It is essential that this is executed in your .venv. This is handled through the .BAT file which activated the .venv
-    before running the script which calles this function.
-
-    :param requirements_file: Path to the requirements.txt file
-    :param hash_file: Path to the file storing the previous hash
+    Args:
+        requirements_file(str, optional): Denoted the name of the file containing the updated list of dependancies.
+        .requirements_has(str, optional): Denotes the name of the file containg the has of the latest commit.
+    Notes:
+    -
+    Should an error be detected, the `error_handler` module is called, when will process the error and generate a support ticket, which is then sent to tee relevant department.
+    
     """
     def compute_hash(file_path):
         """Computes the hash of a file."""
@@ -48,4 +50,5 @@ def check_and_install_new_dependencies(requirements_file="requirements.txt", has
             custom_message = f"Failed to install dependencies: {e}"
             custom_subject = "Dependancy installation failure"
             print(f"Failed to install dependencies: {e} {custom_message}{custom_subject}")
-            freshdesk_ticket.create_freshdesk_ticket(custom_message,custom_subject)
+            error_handler.global_error_handler(custom_subject, custom_message)
+            return

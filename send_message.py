@@ -3,7 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 from dotenv import load_dotenv
-import freshdesk_ticket as fd
+import error_handler
 
 load_dotenv()
 
@@ -26,6 +26,23 @@ def company_signoff() -> None:
     <b>{MESSAGING_METADATA["SENDER_NAME"]}</b><br>
     The {MESSAGING_METADATA['SENDER_DEPARTMENT']} Team<br>
     """
+
+def smtp_authentication() -> bool:
+    """Checks for the validity of your SMTP credentials. These are retrieved from your `.env` file.
+    """
+    try:
+    
+        if not MESSAGING_METADATA["SMTP_SERVER"] or not MESSAGING_METADATA["SMTP_PORT"] or not MESSAGING_METADATA["SMTP_PASSWORD"] or not MESSAGING_METADATA["SMTP_EMAIL"]:
+            raise KeyError("One or more SMTP credentials are misisng, please check and these these credentials.")
+    
+        if not MESSAGING_METADATA["SENDER_EMAIL"] or MESSAGING_METADATA["REQUESTER_EMAIL"]:
+            raise KeyboardInterrupt("Requester credentials are missing, please specicy these credentials.")
+
+    except KeyError as e:
+        error_handler.global_error_handler("SMTP Authentication Failure", f"{e}")
+        return False
+    
+    return True
 
 def send_message(software_updates:list, mime_type:str = "html") -> None:
     
@@ -55,6 +72,10 @@ def send_message(software_updates:list, mime_type:str = "html") -> None:
     body            = message_body
     msg.attach(MIMEText(body, mime_type))
 
+    if not smtp_authentication():
+        
+        return
+    
     try:
         with smtplib.SMTP(MESSAGING_METADATA["SMTP_SERVER"], MESSAGING_METADATA["SMTP_PORT"]) as server:
 
@@ -68,16 +89,12 @@ def send_message(software_updates:list, mime_type:str = "html") -> None:
                             msg.as_string()
             )
 
-            return True
+            return
         
     except Exception as e:
 
         custom_message = f"Error sending email: {e}"
         custom_subject  = "SMTP Authentication Error"
+        error_handler.global_error_handler(custom_subject,custom_message)
 
-        print(custom_subject)
-        print(custom_message)
-
-        fd.create_freshdesk_ticket(custom_message,custom_subject)
-
-        return False
+        return

@@ -2,8 +2,7 @@ import subprocess
 import os
 from install_new_dependencies import check_and_install_new_dependencies
 from dotenv import load_dotenv
-from pathlib import Path
-from error_handler import global_error_handler, generate_support_ticket
+from error_handler import global_error_handler
 import send_message as message
 
 load_dotenv()
@@ -17,8 +16,17 @@ base_directory = BASE_DIRECTORY_ENV["BASE_DIRECTORY"]
 def run_command(command: str, cwd: str = None):
     return subprocess.run(command, cwd=cwd, text=True, capture_output=True)
 
-def base_directory_validation() -> bool:
-    
+def base_directory_validation(base_directory:str) -> bool:
+    """
+    Checks the validity of the base directory. This is retrieved from the `.env` file.
+    Args:
+        base_directory(str): Denoted the path of the base directory
+    Returns:
+        base_directory(str): Returns the path of the base directory
+    Exceptions:
+        KeyError: A KeyError is raised when no base directory is specified
+        FileNotFoundError: Raised whe a base directory is specified, how this is incorrect. It will prompt you to double check this. 
+    """
     try:
     
         if not base_directory:
@@ -43,40 +51,52 @@ def base_directory_validation() -> bool:
 
 def directory_validation(cwd:str) -> bool:
         
+    """
+    Checks cor the validity of the full directory. 
+    Args:
+        cwd(str):Denotes the current working directory.
+    Returns:
+        bool: True if the directory is valid, else returns False.
+    Exceptions:
+        FileNotFoundError: Raised when the file is not found and therefire the direcvory is invalid.
+        Exception: Raised when any other error is thrown.
+    """
+    
     error_message_type = "Directory Validation Error"
     
     try:
-
+        
         os.chdir(cwd)
         
         directory_contents = os.listdir(cwd)
         
         if ".git" in directory_contents:
-            
+                        
             return True
         
-        else:
-                       
-            global_error_handler(f"{error_message_type}",f"This is not a local git repository. Please navigate to {cwd} and run 'git init' to initialise the folder.")
+        global_error_handler(f"{error_message_type}",f"This is not a local git repository. Please navigate to {cwd} and run 'git init' to initialise the folder.")
             
-            return False
-
     except FileNotFoundError as e:
         
         global_error_handler(f"{error_message_type} FileNotFound Error", f"FileNotFoundError {e} for Directory {cwd}")
         
-        return False
-
     except Exception as e:
 
         global_error_handler(f"{error_message_type} Exception Error", f"Exception - {e}")
         
-        return False
+    return False
 
 def install_updates(cwd: str = None) -> bool:
-    """Checks for new commits and dependancies in the remote repo by checking the status of the branch after fetching any new commits from the repo.
-    If there are updates available, it will run the 'git pull' command before checking for any new dependancies in the 'requirements.txt' file.
-    If there are any new dependacies, it will autmatically installs them"""
+    """Installs any new package updates by checking for differences between the local machine and the remote repository. If there are any new commits since the previous update, it will install the update.
+    Args:
+        cwd(str, optional): Denotes the current working directory.
+    Returns:
+        bool: True if there are no errors and that updates have been successfully installed, else returns False.
+    Notes:
+    -
+    The script will now also install any new dependances from the `requirements.txt` file if any new dependancies have been detected. If they have, the script will install these as well.
+
+    """
     
     error_message_type = "Update Installation Error"
     
@@ -115,21 +135,32 @@ def install_updates(cwd: str = None) -> bool:
     return True
 
 def check_for_updates():
-
+    """
+    Loops through all of the specified directories by constructing each directory, checks for their validity, checks for any changes before installing them.
+    This will check the validity of the base directory first. If this fails, the script will exit early.
+    Notes:
+    -
+    Any exceptions or error will be handles and processed by the `error_handler` module.
+    """
+    
     updated_software_packages = []
 
-    if base_directory_validation():
+    if not base_directory_validation(base_directory):
+                
+        return
         
+    else:
+    
         try:
             
             for software_package in os.listdir(base_directory):
                 
                 cwd = os.path.join(base_directory, software_package)
-                
+                                
                 if not install_updates(cwd):
                                         
                     continue 
-
+                
                 updated_software_packages.append(software_package)
             
             if updated_software_packages:
@@ -138,7 +169,7 @@ def check_for_updates():
 
         except Exception as e:
                         
-            generate_support_ticket("Error in checking for updates", f"Unfortunately, there was an error in checking for updates. Please find the following error message {e}")
+            global_error_handler("Error in checking for updates", f"Unfortunately, there was an error in checking for updates. Please find the following error message {e}")
             
             return
 
