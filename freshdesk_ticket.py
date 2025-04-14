@@ -67,24 +67,24 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
     {exception_or_error_message}<br><br>
     ===================================================
     """
-
-    ticket_data = {
-        "subject"     : subject,
-        "description" : description, 
-        'priority'    : 1,
-        'status'      : 2,
-        'group_id'    : group_id,
-        'responder_id': responder_id,
-        'requester'   : {
-            'name'    : MESSAGING_METADATA["REQUESTER_NAME"],
-            'email'   : MESSAGING_METADATA["REQUESTER_EMAIL"]
-        } 
-    }
-
-    custom_message  = None
-    ticket_id       = None
-        
     try:
+
+        ticket_data = {
+            "subject"     : subject,
+            "description" : description, 
+            'priority'    : 1,
+            'status'      : 2,
+            'group_id'    : group_id,
+            'responder_id': responder_id,
+            'requester'   : {
+                'name'    : MESSAGING_METADATA["REQUESTER_NAME"],
+                'email'   : MESSAGING_METADATA["REQUESTER_EMAIL"]
+            } 
+        }
+
+        custom_message  = None
+        ticket_id       = None
+    
         response = r.post(
             API_URL,
             auth    = (FRESHDESK_CREDENTIALS["FRESHDESK_API_KEY"], 'X'),
@@ -93,14 +93,6 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
             headers = {'Content-Type' : 'application/json'}
         )
 
-    except r.RequestException as e:
-        custom_message = f"Requests Exception: {e}"
-
-    except Exception as e:
-        custom_message = f"General Exception: {e}"
-
-    else:
-    
         if response.status_code == 201:
             
             ticket_info = response.json
@@ -109,7 +101,14 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
 
         else:
             custom_message = f"Error code: {response.status_code} Error HTTP response: {response.text} Error response {response.content}"
+            print(custom_message)
+            return -1
 
-    if custom_message:
-        print(custom_message)
-        return None
+    except r.RequestException as e:
+        custom_message = f"Requests Exception: {e}"
+
+    except Exception as e:
+        custom_message = f"General Exception: {e}"
+    
+    print(custom_message)
+    return -1

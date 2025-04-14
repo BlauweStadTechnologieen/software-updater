@@ -65,18 +65,20 @@ def send_message(software_updates:list, mime_type:str = "html") -> None:
     * You must be logged into the GitHub Repository in order to see the list of commits within the API call.<br><br>
     {company_signoff()}<br><br>
     """
-    msg             = MIMEMultipart()
-    msg['Subject']  = "Updated Software Packages"
-    msg['From']     = f'"{MESSAGING_METADATA["SENDER_NAME"]}" <{MESSAGING_METADATA["SENDER_EMAIL"]}>'
-    msg['To']       = MESSAGING_METADATA["REQUESTER_EMAIL"]
-    body            = message_body
-    msg.attach(MIMEText(body, mime_type))
 
     if not smtp_authentication():
         
         return
     
     try:
+        
+        msg             = MIMEMultipart()
+        msg['Subject']  = "Updated Software Packages"
+        msg['From']     = f'"{MESSAGING_METADATA["SENDER_NAME"]}" <{MESSAGING_METADATA["SENDER_EMAIL"]}>'
+        msg['To']       = MESSAGING_METADATA["REQUESTER_EMAIL"]
+        body            = message_body
+        msg.attach(MIMEText(body, mime_type))
+        
         with smtplib.SMTP(MESSAGING_METADATA["SMTP_SERVER"], MESSAGING_METADATA["SMTP_PORT"]) as server:
 
             server.starttls()
@@ -89,12 +91,18 @@ def send_message(software_updates:list, mime_type:str = "html") -> None:
                             msg.as_string()
             )
 
-            return
+            return None
         
+    except smtplib.SMTPAuthenticationError as authentication_error_message:
+        error_handler.global_error_handler("SMTP Authentication Error","f{authentication_error_message}")
+
+    except smtplib.SMTPConnectError as connection_error_message:
+        error_handler.global_error_handler("SMTP Connection Error",f"{connection_error_message}")
+
+    except smtplib.SMTPResponseException as response_exception:
+        error_handler.global_error_handler("SMTP Response Exception",f"{response_exception}")
+    
     except Exception as e:
+        error_handler.global_error_handler("General Exception Message", f"{e}")
 
-        custom_message = f"Error sending email: {e}"
-        custom_subject  = "SMTP Authentication Error"
-        error_handler.global_error_handler(custom_subject,custom_message)
-
-        return
+    return None
