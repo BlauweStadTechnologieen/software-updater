@@ -35,7 +35,7 @@ def smtp_authentication() -> bool:
         if not MESSAGING_METADATA["SMTP_SERVER"] or not MESSAGING_METADATA["SMTP_PORT"] or not MESSAGING_METADATA["SMTP_PASSWORD"] or not MESSAGING_METADATA["SMTP_EMAIL"]:
             raise KeyError("One or more SMTP credentials are misisng, please check and these these credentials.")
     
-        if not MESSAGING_METADATA["SENDER_EMAIL"] or MESSAGING_METADATA["REQUESTER_EMAIL"]:
+        if not MESSAGING_METADATA["SENDER_EMAIL"] or not MESSAGING_METADATA["REQUESTER_EMAIL"]:
             raise KeyError("Either the sender email or the requester email is missing from the .env file.")
 
     except KeyError as e:
