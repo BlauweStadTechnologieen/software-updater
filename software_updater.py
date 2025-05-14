@@ -129,10 +129,12 @@ def install_updates(cwd: str = None) -> bool:
                 
                 return False
 
-            print("New changes detected")
             check_and_install_new_dependencies()
 
-    return True
+            return True
+        
+        print("No Updates Found")
+        return False
 
 def check_for_updates():
     """
