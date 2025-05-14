@@ -36,7 +36,7 @@ def smtp_authentication() -> bool:
             raise KeyError("One or more SMTP credentials are misisng, please check and these these credentials.")
     
         if not MESSAGING_METADATA["SENDER_EMAIL"] or MESSAGING_METADATA["REQUESTER_EMAIL"]:
-            raise KeyboardInterrupt("Requester credentials are missing, please specicy these credentials.")
+            raise KeyError("Either the sender email or the requester email is missing from the .env file.")
 
     except KeyError as e:
         error_handler.global_error_handler("SMTP Authentication Failure", f"{e}")
