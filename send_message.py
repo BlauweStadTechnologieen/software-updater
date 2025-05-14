@@ -30,16 +30,17 @@ def company_signoff() -> None:
 def smtp_authentication() -> bool:
     """Checks for the validity of your SMTP credentials. These are retrieved from your `.env` file.
     """
-    try:
+    required_fields = [
+        "SMTP_SERVER", "SMTP_PORT", "SMTP_PASSWORD", "SMTP_EMAIL",
+        "SENDER_EMAIL", "REQUESTER_EMAIL"
+    ]
     
-        if not MESSAGING_METADATA["SMTP_SERVER"] or not MESSAGING_METADATA["SMTP_PORT"] or not MESSAGING_METADATA["SMTP_PASSWORD"] or not MESSAGING_METADATA["SMTP_EMAIL"]:
-            raise KeyError("One or more SMTP credentials are misisng, please check and these these credentials.")
+    missing_fields = [field for field in required_fields if not MESSAGING_METADATA.get(field)]
     
-        if not MESSAGING_METADATA["SENDER_EMAIL"] or not MESSAGING_METADATA["REQUESTER_EMAIL"]:
-            raise KeyError("Either the sender email or the requester email is missing from the .env file.")
-
-    except KeyError as e:
-        error_handler.global_error_handler("Missing SMTP Credentials", f"{e}")
+    if missing_fields:
+       
+        error_handler.global_error_handler("Missing SMTP Credentials",f"The following fields are missing or empty in the .env file: {', '.join(missing_fields)}")
+        
         return False
     
     return True
