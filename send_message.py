@@ -39,7 +39,7 @@ def smtp_authentication() -> bool:
             raise KeyError("Either the sender email or the requester email is missing from the .env file.")
 
     except KeyError as e:
-        error_handler.global_error_handler("SMTP Authentication Failure", f"{e}")
+        error_handler.global_error_handler("Missing SMTP Credentials", f"{e}")
         return False
     
     return True
