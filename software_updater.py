@@ -52,43 +52,6 @@ def base_directory_validation(base_directory:str) -> bool:
     
     return True
 
-def directory_validation(cwd:str) -> bool:
-        
-    """
-    Checks cor the validity of the full directory. 
-    Args:
-        cwd(str):Denotes the current working directory.
-    Returns:
-        bool: True if the directory is valid, else returns False.
-    Exceptions:
-        FileNotFoundError: Raised when the file is not found and therefire the direcvory is invalid.
-        Exception: Raised when any other error is thrown.
-    """
-    
-    error_message_type = "Directory Validation Error"
-    
-    try:
-        
-        os.chdir(cwd)
-        
-        directory_contents = os.listdir(cwd)
-        
-        if ".git" in directory_contents:
-                        
-            return True
-        
-        global_error_handler(f"{error_message_type}",f"This is not a local git repository. Please navigate to {cwd} and run 'git init' to initialise the folder.")
-            
-    except FileNotFoundError as e:
-        
-        global_error_handler(f"{error_message_type} FileNotFound Error", f"FileNotFoundError {e} for Directory {cwd}")
-        
-    except Exception as e:
-
-        global_error_handler(f"{error_message_type} Exception Error", f"Exception - {e}")
-        
-    return False
-
 def get_latest_release_zip_url(repo:str) -> str:
     """
     Retrieves the latest release zip URL from the GitHub API.
@@ -98,15 +61,20 @@ def get_latest_release_zip_url(repo:str) -> str:
         str: The URL of the latest release zip file.
     """
     
-    api_url = f"https://api.github.com/repos/{repo}/releases/latest"
+    api_url = f"https://api.github.com/repos/BlauweStadTechnologieen/{repo}/releases/latest"
+
 
     try:
+        
         response = requests.get(api_url)
         response.raise_for_status()
         release_data = response.json()
         return release_data["zipball_url"]
+    
     except requests.RequestException as e:
+        
         global_error_handler("GitHub API Error", f"Failed to fetch the latest release zip URL: {e}")
+        
         return None
 
 def download_and_extract_zip(repo:str, extract_to:str) -> bool:
@@ -121,6 +89,8 @@ def download_and_extract_zip(repo:str, extract_to:str) -> bool:
     zip_url = get_latest_release_zip_url(repo)
     
     if not zip_url:
+        
+        print("Failed to retrieve the latest release zip URL.")
         
         return False    
     
@@ -169,9 +139,6 @@ def install_updates(repo:str, cwd: str = None) -> bool:
 
     """
     
-    if not directory_validation(cwd):
-        return False
-    
     success = download_and_extract_zip(repo, cwd)
 
     if not success:
@@ -194,8 +161,9 @@ def check_for_updates():
     """
     
     REPO_MAPPING = {
-        "github-push-script": "BlauweStadTechnologieen/github-push-script",
-        "azure-vm-monitor": "BlauweStadTechnologieen/azure-vm-monitor"
+
+        "test-folder": "software-updater",
+        "test-folder-2": "software-updater"
     }
     
     updated_software_packages = []
