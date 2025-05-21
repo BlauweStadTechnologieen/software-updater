@@ -1,5 +1,4 @@
-import json as j
-import requests as r
+import requests
 import os
 from dotenv import load_dotenv
 
@@ -12,10 +11,11 @@ FRESHDESK_CREDENTIALS = {
 
 MESSAGING_METADATA = {
     "REQUESTER_NAME" : os.getenv("REQUESTER_NAME"),
-    "REQUESTER_EMAIL": os.getenv("REQUESTER_EMAIL")
+    "REQUESTER_EMAIL": os.getenv("REQUESTER_EMAIL"),
+    "SENDER"         : os.getenv("SENDER_NAME"),
 }
 
-def validate_freshdesk_credentials() -> bool:
+def confirm_credentials_present() -> bool:
     """
     Checks to ensure that all FD credentiuals have been specified in the `.env` file.
     Returns:
@@ -55,17 +55,22 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
 
     """
     
-    if not validate_freshdesk_credentials():
+    if not confirm_credentials_present():
                 
         return
     
     API_URL = f'https://{FRESHDESK_CREDENTIALS["FRESHDESK_DOMAIN"]}.freshdesk.com/api/v2/tickets/'
 
     description = f"""
-    Dear {MESSAGING_METADATA["REQUESTER_NAME"]}<br>
+    Dear {MESSAGING_METADATA["REQUESTER_NAME"]}<br><br>
     A support ticket has been automatically generated because of the following error or exception message:<br><br>
     {exception_or_error_message}<br><br>
-    ===================================================
+    You can view the ticket here: <a href="https://{FRESHDESK_CREDENTIALS["FRESHDESK_DOMAIN"]}.freshdesk.com/a/tickets/{ticket_id}">Ticket Link</a><br><br>
+    Please do not reply to this email. This is an automated message from the system.<br><br>
+    Kind regards,<br>
+    The Support Team<br>
+    <br>
+    {MESSAGING_METADATA["SENDER"]}<br>
     """
     try:
 
@@ -76,26 +81,24 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
             'status'      : 2,
             'group_id'    : group_id,
             'responder_id': responder_id,
-            'requester'   : {
-                'name'    : MESSAGING_METADATA["REQUESTER_NAME"],
-                'email'   : MESSAGING_METADATA["REQUESTER_EMAIL"]
-            } 
+            "email"       : MESSAGING_METADATA["REQUESTER_EMAIL"],
+            "name"        : MESSAGING_METADATA["REQUESTER_NAME"]
         }
 
         custom_message  = None
         ticket_id       = None
     
-        response = r.post(
+        response = requests.post(
             API_URL,
             auth    = (FRESHDESK_CREDENTIALS["FRESHDESK_API_KEY"], 'X'),
-            json    = j.dumps(ticket_data),
+            json    = ticket_data,
             timeout = 30,
             headers = {'Content-Type' : 'application/json'}
         )
 
         if response.status_code == 201:
             
-            ticket_info = response.json
+            ticket_info = response.json()
             ticket_id   = ticket_info.get("id")
             return ticket_id
 
@@ -104,7 +107,7 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
             print(custom_message)
             return response.status_code
 
-    except r.RequestException as e:
+    except requests.RequestException as e:
         custom_message = f"Requests Exception: {e}"
 
     except Exception as e:
