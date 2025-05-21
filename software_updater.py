@@ -162,7 +162,6 @@ def check_for_updates():
         "software-updater"      : "software-updater",
         "git-commit"            : "github-push-script",
         "vm-status-monitor"     : "azure-vm-monitor",
-        "corporate-branding"    : "Corporate-Branding",
     }
     
     updated_software_packages = []
