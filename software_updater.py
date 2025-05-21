@@ -1,4 +1,3 @@
-import subprocess
 import os
 from install_new_dependencies import check_and_install_new_dependencies
 from dotenv import load_dotenv
@@ -15,9 +14,6 @@ BASE_DIRECTORY_ENV = {
 }
 
 base_directory = BASE_DIRECTORY_ENV["BASE_DIRECTORY"]
-
-def run_command(command: str, cwd: str = None):
-    return subprocess.run(command, cwd=cwd, text=True, capture_output=True)
 
 def base_directory_validation(base_directory:str) -> bool:
     """
@@ -63,7 +59,6 @@ def get_latest_release_zip_url(repo:str) -> str:
     
     api_url = f"https://api.github.com/repos/BlauweStadTechnologieen/{repo}/releases/latest"
 
-
     try:
         
         response = requests.get(api_url)
@@ -89,8 +84,10 @@ def download_and_extract_zip(repo:str, extract_to:str) -> bool:
     zip_url = get_latest_release_zip_url(repo)
     
     if not zip_url:
-        
-        print("Failed to retrieve the latest release zip URL.")
+                
+        custom_subject = f"Failed to get the latest release zip URL for {repo}"
+        custom_message = f"Failed to get the latest release zip URL for {repo}. Please check the repository name and try again."
+        global_error_handler(custom_subject, custom_message)
         
         return False    
     
@@ -162,8 +159,10 @@ def check_for_updates():
     
     REPO_MAPPING = {
 
-        "test-folder": "software-updater",
-        "test-folder-2": "software-updater"
+        "software-updater"      : "software-updater",
+        "git-commit"            : "github-push-script",
+        "vm-status-monitor"     : "azure-vm-monitor",
+        "corporate-branding"    : "Corporate-Branding",
     }
     
     updated_software_packages = []
@@ -180,6 +179,8 @@ def check_for_updates():
             
             if software_package not in REPO_MAPPING:
 
+                print(f"Skipping {software_package} as it is not in the mapping.")
+                
                 continue
 
             github_repo = REPO_MAPPING[software_package]
