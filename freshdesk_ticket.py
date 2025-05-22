@@ -66,7 +66,7 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
     A support ticket has been automatically generated because of the following error or exception message:<br><br>
     {exception_or_error_message}<br><br>
     You can view the ticket here: <a href="https://{FRESHDESK_CREDENTIALS["FRESHDESK_DOMAIN"]}.freshdesk.com/a/tickets/{ticket_id}">Ticket Link</a><br><br>
-    Please do not reply to this email. This is an automated message from the system.<br><br>
+    You can reply to this email if wish to add any further information about this incident.<br><br>
     Kind regards,<br>
     The Support Team<br>
     <br>
