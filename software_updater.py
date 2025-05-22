@@ -83,12 +83,8 @@ def download_and_extract_zip(repo:str, extract_to:str) -> bool:
     """
     zip_url = get_latest_release_zip_url(repo)
     
-    if not zip_url:
+    if zip_url is None:
                 
-        custom_subject = f"Failed to get the latest release zip URL for {repo}"
-        custom_message = f"Failed to get the latest release zip URL for {repo}. Please check the repository name and try again."
-        global_error_handler(custom_subject, custom_message)
-        
         return False    
     
     try:
@@ -160,9 +156,13 @@ def install_updates(repo:str, cwd: str = None) -> bool:
 
     """
     
-    download_and_extract_zip(repo, cwd)
+    if not download_and_extract_zip(repo, cwd):
+
+        return False
 
     check_and_install_new_dependencies() 
+
+    return True
     
 
 def check_for_updates():
