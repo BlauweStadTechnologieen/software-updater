@@ -118,10 +118,34 @@ def download_and_extract_zip(repo:str, extract_to:str) -> bool:
 
         return True
     
+    except PermissionError as e:
+        
+        global_error_handler("Permission Error", f"Permission denied: {e}")
+        
+        return False
+
+    except FileNotFoundError as e:
+        
+        global_error_handler("File Not Found Error", f"File not found: {e}")
+        
+        return False
+    
+    except requests.RequestException as e:
+        
+        global_error_handler("Request Error", f"Request error: {e}")
+        
+        return False
+    
+    except zipfile.BadZipFile as e:
+        
+        global_error_handler("Bad Zip File Error", f"Bad zip file: {e}")
+        
+        return False    
+    
     except Exception as e:
-
-        global_error_handler("Zip Extraction Error", f"Failed to download or extract the zip file: {e}")
-
+        
+        global_error_handler("General Error", f"An error occurred: {e}")
+        
         return False
 
 def install_updates(repo:str, cwd: str = None) -> bool:
@@ -136,17 +160,10 @@ def install_updates(repo:str, cwd: str = None) -> bool:
 
     """
     
-    success = download_and_extract_zip(repo, cwd)
+    download_and_extract_zip(repo, cwd)
 
-    if not success:
-        
-        global_error_handler("Update Installation Error", f"Failed to download and extract the zip file for {repo}.")
-        
-        return False
-
-    check_and_install_new_dependencies()
-
-    return True
+    check_and_install_new_dependencies() 
+    
 
 def check_for_updates():
     """
