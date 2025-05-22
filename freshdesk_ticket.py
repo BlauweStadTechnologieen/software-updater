@@ -12,7 +12,8 @@ FRESHDESK_CREDENTIALS = {
 MESSAGING_METADATA = {
     "REQUESTER_NAME" : os.getenv("REQUESTER_NAME"),
     "REQUESTER_EMAIL": os.getenv("REQUESTER_EMAIL"),
-    "SENDER"         : os.getenv("SENDER_NAME"),
+    "SENDER"         : os.getenv("SENDER_NAME"),""
+    "DEPARTMENT"     : os.getenv("SENDER_DEPARTMENT"),
 }
 
 def confirm_credentials_present() -> bool:
@@ -71,6 +72,7 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
     The Support Team<br>
     <br>
     {MESSAGING_METADATA["SENDER"]}<br>
+    {MESSAGING_METADATA["DEPARTMENT"]}<br>
     """
     try:
 
