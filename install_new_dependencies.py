@@ -25,6 +25,7 @@ def check_and_install_new_dependencies(requirements_file:str ="requirements.txt"
     if not os.path.exists(requirements_file):
         custom_message = f"{requirements_file} not found!"
         custom_subject = "Requirements.txt file not found"
+        error_handler.global_error_handler(custom_subject, custom_message)
         print(f"{requirements_file} not found!")
         return
 
