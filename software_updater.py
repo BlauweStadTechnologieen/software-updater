@@ -174,7 +174,7 @@ def install_updates(repo_name, target_dir):
     """
     Downloads and extracts the GitHub repo as a ZIP into the target_dir (flattened).
     """
-    zip_url = f"https://github.com/YourOrgOrUser/{repo_name}/archive/refs/heads/main.zip"
+    zip_url = f"https://github.com/BlauweStadTechnologieen/{repo_name}/archive/refs/heads/main.zip"
     zip_path = os.path.join(target_dir, "temp_repo.zip")
 
     try:
