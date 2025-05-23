@@ -144,25 +144,60 @@ def download_and_extract_zip(repo:str, extract_to:str) -> bool:
         
         return False
 
-def install_updates(repo:str, cwd: str = None) -> bool:
-    """Installs any new package updates by checking for differences between the local machine and the remote repository. If there are any new commits since the previous update, it will install the update.
-    Args:
-        cwd(str, optional): Denotes the current working directory.
-    Returns:
-        bool: True if there are no errors and that updates have been successfully installed, else returns False.
-    Notes:
-    -
-    The script will now also install any new dependances from the `requirements.txt` file if any new dependancies have been detected. If they have, the script will install these as well.
 
-    """
+def extract_zip_flat(zip_path, target_dir):
     
-    if not download_and_extract_zip(repo, cwd):
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        
+        members = zip_ref.namelist()
+        
+        # Detect common prefix (like repo-main/)
+        common_prefix = os.path.commonprefix(members)
+        
+        if not common_prefix.endswith("/"):
+            common_prefix = os.path.dirname(common_prefix) + "/"
 
+        for member in members:
+            
+            if member.endswith("/"):
+                continue
+            
+            member_path = member[len(common_prefix):]
+            target_path = os.path.join(target_dir, member_path)
+            os.makedirs(os.path.dirname(target_path), exist_ok=True)
+            
+            with zip_ref.open(member) as source, open(target_path, "wb") as target:
+                target.write(source.read())
+
+
+def install_updates(repo_name, target_dir):
+    """
+    Downloads and extracts the GitHub repo as a ZIP into the target_dir (flattened).
+    """
+    zip_url = f"https://github.com/YourOrgOrUser/{repo_name}/archive/refs/heads/main.zip"
+    zip_path = os.path.join(target_dir, "temp_repo.zip")
+
+    try:
+        print(f"Downloading update for {repo_name}...")
+        response = requests.get(zip_url)
+        response.raise_for_status()
+
+        with open(zip_path, "wb") as f:
+            f.write(response.content)
+
+        # Extract directly into the target directory
+        extract_zip_flat(zip_path, target_dir)
+
+        # Optionally: clean up
+        os.remove(zip_path)
+
+        print(f"{repo_name} updated successfully.")
+        return True
+
+    except Exception as e:
+        print(f"Failed to update {repo_name}: {e}")
         return False
 
-    check_and_install_new_dependencies() 
-
-    return True
     
 
 def check_for_updates():
@@ -202,9 +237,7 @@ def check_for_updates():
 
             github_repo = REPO_MAPPING[software_package]
             
-            if not install_updates(github_repo, cwd):
-                                    
-                continue 
+            install_updates(github_repo, cwd)
             
             updated_software_packages.append(software_package)
         
