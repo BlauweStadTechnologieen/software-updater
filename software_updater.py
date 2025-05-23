@@ -176,9 +176,10 @@ def check_for_updates():
     
     REPO_MAPPING = {
 
-        "software-updater"      : "software-updater",
-        "git-commit"            : "github-push-script",
-        "vm-status-monitor"     : "azure-vm-monitor",
+        "software-updater"          : "software-updater",
+        "git-commit"                : "github-push-script",
+        "vm-status-monitor"         : "azure-vm-monitor",
+        "create-virtual-environment": "create-virtual-environment",
     }
     
     updated_software_packages = []
