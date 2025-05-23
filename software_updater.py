@@ -192,10 +192,13 @@ def install_updates(repo_name, target_dir):
         os.remove(zip_path)
 
         print(f"{repo_name} updated successfully.")
+        
         return True
 
     except Exception as e:
-        print(f"Failed to update {repo_name}: {e}")
+        
+        global_error_handler("Update Error", f"Failed to update {repo_name}: {e}")
+        
         return False
 
     
