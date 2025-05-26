@@ -177,12 +177,6 @@ def get_latest_tag(repo_name):
     url = f"https://api.github.com/repos/{github_owner}/{repo_name}/tags"
     
     headers = {'User-Agent': 'Updater/1.0'}
-
-    github_token = os.getenv("GITHUB_TOKEN")
-
-    if github_token:
-        
-        headers['Authorization'] = f'token {github_token}'
     
     response = requests.get(url, headers=headers)
     
@@ -285,7 +279,7 @@ def check_for_updates():
             updated_software_packages.append(software_package)
         
         if updated_software_packages:
-            
+                        
             message.send_message(updated_software_packages)
 
     except Exception as e:
