@@ -15,6 +15,8 @@ BASE_DIRECTORY_ENV = {
 
 base_directory = BASE_DIRECTORY_ENV["BASE_DIRECTORY"]
 
+github_owner = os.getenv("GITHUB_USERNAME")
+
 def base_directory_validation(base_directory:str) -> bool:
     """
     Checks the validity of the base directory. This is retrieved from the `.env` file.
@@ -57,7 +59,7 @@ def get_latest_release_zip_url(repo:str) -> str:
         str: The URL of the latest release zip file.
     """
     
-    api_url = f"https://api.github.com/repos/BlauweStadTechnologieen/{repo}/releases/latest"
+    api_url = f"https://api.github.com/repos/{github_owner}/{repo}/releases/latest"
 
     try:
         
@@ -169,16 +171,43 @@ def extract_zip_flat(zip_path, target_dir):
             with zip_ref.open(member) as source, open(target_path, "wb") as target:
                 target.write(source.read())
 
+def get_latest_tag(repo_name):
+    
+    print(f"Fetching latest tag for {repo_name}...")
+
+    url = f"https://api.github.com/repos/{github_owner}/{repo_name}/tags"
+    
+    headers = {'User-Agent': 'Updater/1.0'}
+
+    github_token = os.getenv("GITHUB_TOKEN")
+
+    if github_token:
+        
+        headers['Authorization'] = f'token {github_token}'
+    
+    response = requests.get(url, headers=headers)
+    
+    response.raise_for_status()
+
+    tags = response.json()
+
+    if not tags:
+        
+        raise Exception(f"No tags found for {repo_name}")
+    
+    return tags[0]['name'] 
 
 def install_updates(repo_name, target_dir):
     """
     Downloads and extracts the GitHub repo as a ZIP into the target_dir (flattened).
     """
-    zip_url = f"https://github.com/BlauweStadTechnologieen/{repo_name}/archive/refs/heads/main.zip"
+    release_tag = get_latest_tag(repo_name)
+
+    zip_url = f"https://github.com/{github_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
+
     zip_path = os.path.join(target_dir, "temp_repo.zip")
 
     try:
-        print(f"Downloading update for {repo_name}...")
         response = requests.get(zip_url)
         response.raise_for_status()
 
@@ -190,18 +219,28 @@ def install_updates(repo_name, target_dir):
 
         # Optionally: clean up
         os.remove(zip_path)
-
-        print(f"{repo_name} updated successfully.")
         
         return True
-
+    
+    except requests.RequestException as e:
+        
+        print(f"Request to {zip_url} failed with status {response.status_code}")
+        
+        ##global_error_handler("Request Error", f"Failed to download {repo_name}: {e}")
+        
+        return False
+    
+    except requests.exceptions.HTTPError as e:
+        
+        global_error_handler("HTTP Error", f"HTTP error occurred while downloading {repo_name}: {e}")
+        
+        return False
+    
     except Exception as e:
         
         global_error_handler("Update Error", f"Failed to update {repo_name}: {e}")
         
         return False
-
-    
 
 def check_for_updates():
     """
@@ -240,12 +279,14 @@ def check_for_updates():
 
             github_repo = REPO_MAPPING[software_package]
             
-            install_updates(github_repo, cwd)
+            if not install_updates(github_repo, cwd):
+                
+                continue
             
             updated_software_packages.append(software_package)
         
         if updated_software_packages:
-
+            
             message.send_message(updated_software_packages)
 
     except Exception as e:
