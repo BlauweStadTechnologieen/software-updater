@@ -1,5 +1,4 @@
 import os
-from install_new_dependencies import check_and_install_new_dependencies
 from dotenv import load_dotenv
 from error_handler import global_error_handler
 import send_message as message
@@ -226,7 +225,7 @@ def install_updates(repo_name, target_dir):
         
         print(f"Request to {zip_url} failed with status {response.status_code}")
         
-        ##global_error_handler("Request Error", f"Failed to download {repo_name}: {e}")
+        global_error_handler("Request Error", f"Failed to download {repo_name}: {e}")
         
         return False
     
