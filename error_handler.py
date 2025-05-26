@@ -8,5 +8,5 @@ def global_error_handler(subject:str, message:str) -> None:
         message(str): Denotes the description of the error or exception. 
     """
     print(f"{subject} - {message}")
-    #freshdesk_ticket.create_freshdesk_ticket(message, subject)
+    freshdesk_ticket.create_freshdesk_ticket(message, subject)
     return
