@@ -32,13 +32,13 @@ def base_directory_validation(base_directory:str) -> bool:
         
     except KeyError as key_error:
         
-        global_error_handler(f"Base Directory Key Error",f"The key for the base directory .env is missing. {key_error}")
+        global_error_handler("Missing base directory in your .env file",f"The key for the base directory within your .env file is missing. {key_error}")
         
         return False
 
     except FileNotFoundError as e:
         
-        global_error_handler("Invalid base directory", f"Unfortunately we unable to find the {base_directory} on the system. - {e}")
+        global_error_handler("The specified base directory in your .env file is invalid", f"Unfortunately we unable to find the {base_directory} on the system. - {e}")
         
         return False
     
@@ -64,7 +64,7 @@ def get_latest_release_zip_url(repo:str) -> str:
     
     except requests.RequestException as e:
         
-        global_error_handler("GitHub API Error", f"Failed to fetch the latest release zip URL: {e}")
+        global_error_handler("Latest ZIP URL retrieval error", f"Failed to fetch the latest release ZIP URL for: {e}")
         
         return None
 
@@ -148,19 +148,19 @@ def install_updates(repo_name, target_dir):
         
         print(f"Request to {zip_url} failed with status {response.status_code}")
         
-        global_error_handler("Request Error", f"Failed to download {repo_name}: {e}")
+        global_error_handler("Request Exception Error", f"Failed to download and install the latest release of {repo_name}: {e}")
         
         return False
     
     except requests.exceptions.HTTPError as e:
         
-        global_error_handler("HTTP Error", f"HTTP error occurred while downloading {repo_name}: {e}")
+        global_error_handler("HTTP Error", f"A HTTP error occurred while downloading {repo_name}: {e}")
         
         return False
     
     except Exception as e:
         
-        global_error_handler("Update Error", f"Failed to update {repo_name}: {e}")
+        global_error_handler("Installation failure", f"Failed to update {repo_name}: {e}")
         
         return False
 
