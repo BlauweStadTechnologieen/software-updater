@@ -78,7 +78,7 @@ def create_freshdesk_ticket(exception_or_error_message:str, subject:str, group_i
         ticket_data = {
             "subject"     : subject,
             "description" : description, 
-            'priority'    : 1,
+            'priority'    : 2,
             'status'      : 2,
             'group_id'    : group_id,
             'responder_id': responder_id,
