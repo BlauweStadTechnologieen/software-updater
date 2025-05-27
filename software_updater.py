@@ -8,13 +8,8 @@ import requests
 
 load_dotenv()
 
-BASE_DIRECTORY_ENV = {
-    "BASE_DIRECTORY" : os.getenv("BASE_DIRECTORY")
-}
-
-base_directory = BASE_DIRECTORY_ENV["BASE_DIRECTORY"]
-
-github_owner = os.getenv("GITHUB_USERNAME")
+base_directory  = os.getenv("BASE_DIRECTORY")
+github_owner    = os.getenv("GITHUB_USERNAME")
 
 def base_directory_validation(base_directory:str) -> bool:
     """
@@ -35,9 +30,9 @@ def base_directory_validation(base_directory:str) -> bool:
         if not os.path.isdir(base_directory):
             raise FileNotFoundError(f"Base directory '{base_directory}' does not exist") 
         
-    except KeyError as e:
+    except KeyError as key_error:
         
-        global_error_handler(f"Base Directory Key Error",f"The key for the base directory .env is missing. {e}")
+        global_error_handler(f"Base Directory Key Error",f"The key for the base directory .env is missing. {key_error}")
         
         return False
 
@@ -73,79 +68,6 @@ def get_latest_release_zip_url(repo:str) -> str:
         
         return None
 
-def download_and_extract_zip(repo:str, extract_to:str) -> bool:
-    """
-    Downloads the latest release zip file from the specified GitHub repository and extracts its contents to the given directory.
-    Args:
-        repo (str): The GitHub repository in the format 'owner/repo'.
-        extract_to (str): The directory to extract the contents to.
-    Returns:
-        bool: True if the operation was successful, False otherwise.
-    """
-    zip_url = get_latest_release_zip_url(repo)
-    
-    if zip_url is None:
-                
-        return False    
-    
-    try:
-        
-        response = requests.get(zip_url)
-        response.raise_for_status()
-
-        with zipfile.ZipFile(io.BytesIO(response.content)) as zip_ref:
-            
-            if os.path.exists(extract_to):
-                
-                for filename in os.listdir(extract_to):
-                    
-                    file_path = os.path.join(extract_to, filename)
-                    
-                    if os.path.isfile(file_path) or os.path.islink(file_path):
-                       
-                       os.unlink(file_path)
-                    
-                    elif os.path.isdir(file_path):
-                        
-                        import shutil
-                        
-                        shutil.rmtree(file_path)
-
-            zip_ref.extractall(extract_to)
-
-        return True
-    
-    except PermissionError as e:
-        
-        global_error_handler("Permission Error", f"Permission denied: {e}")
-        
-        return False
-
-    except FileNotFoundError as e:
-        
-        global_error_handler("File Not Found Error", f"File not found: {e}")
-        
-        return False
-    
-    except requests.RequestException as e:
-        
-        global_error_handler("Request Error", f"Request error: {e}")
-        
-        return False
-    
-    except zipfile.BadZipFile as e:
-        
-        global_error_handler("Bad Zip File Error", f"Bad zip file: {e}")
-        
-        return False    
-    
-    except Exception as e:
-        
-        global_error_handler("General Error", f"An error occurred: {e}")
-        
-        return False
-
-
 def extract_zip_flat(zip_path, target_dir):
     
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
@@ -156,11 +78,13 @@ def extract_zip_flat(zip_path, target_dir):
         common_prefix = os.path.commonprefix(members)
         
         if not common_prefix.endswith("/"):
+            
             common_prefix = os.path.dirname(common_prefix) + "/"
 
         for member in members:
             
             if member.endswith("/"):
+                
                 continue
             
             member_path = member[len(common_prefix):]
@@ -168,6 +92,7 @@ def extract_zip_flat(zip_path, target_dir):
             os.makedirs(os.path.dirname(target_path), exist_ok=True)
             
             with zip_ref.open(member) as source, open(target_path, "wb") as target:
+                
                 target.write(source.read())
 
 def get_latest_tag(repo_name):
@@ -177,11 +102,15 @@ def get_latest_tag(repo_name):
     url = f"https://api.github.com/repos/{github_owner}/{repo_name}/tags"
     
     headers = {'User-Agent': 'Updater/1.0'}
+
+    github_api_token = os.getenv("GITHUB_TOKEN")
+
+    if github_api_token:
+    
+        headers["Authorisation"] = f"Bearer {os.getenv('GITHUB_TOKEN')}"
     
     response = requests.get(url, headers=headers)
     
-    response.raise_for_status()
-
     tags = response.json()
 
     if not tags:
