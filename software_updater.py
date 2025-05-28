@@ -113,11 +113,25 @@ def get_latest_tag(repo_name:str) -> dict:
     
     tags = response.json()
 
-    if not tags:
-        
-        raise Exception(f"No tags found for {repo_name}")
+    try:
     
-    return tags[0]['name'] 
+        if not tags:
+            
+            raise Exception(f"No tags found for {repo_name}, please ensure that you have created a tag for the latest release.")
+        
+        return tags[0]['name'] 
+    
+    except requests.RequestException as e:
+        
+        global_error_handler("GitHub API Request Error", f"Failed to fetch tags for {repo_name}: {e}")
+
+        return None
+    
+    except Exception as e:
+        
+        global_error_handler("Tag Retrieval Error", f"An error occurred while retrieving the latest tag for {repo_name}: {e}")
+        
+        return None
 
 def install_updates(repo_name, target_dir):
     """
