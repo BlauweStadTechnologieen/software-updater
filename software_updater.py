@@ -68,7 +68,7 @@ def get_latest_release_zip_url(repo:str) -> str:
         
         return None
 
-def extract_zip_flat(zip_path, target_dir):
+def extract_zip_flat(zip_path:str, target_dir:str):
     
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         
@@ -95,7 +95,7 @@ def extract_zip_flat(zip_path, target_dir):
                 
                 target.write(source.read())
 
-def get_latest_tag(repo_name):
+def get_latest_tag(repo_name:str) -> dict:
     
     print(f"Fetching latest tag for {repo_name}...")
 
