@@ -5,44 +5,12 @@ import send_message as message
 import zipfile
 import io
 import requests
-
+from get_extract_to_directory import get_extract_to_directory
 load_dotenv()
+load_dotenv("dev.env")
 
-base_directory  = os.getenv("BASE_DIRECTORY")
-github_owner    = os.getenv("GITHUB_USERNAME")
-
-def base_directory_validation(base_directory:str) -> bool:
-    """
-    Checks the validity of the base directory. This is retrieved from the `.env` file.
-    Args:
-        base_directory(str): Denoted the path of the base directory
-    Returns:
-        base_directory(str): Returns the path of the base directory
-    Exceptions:
-        KeyError: A KeyError is raised when no base directory is specified
-        FileNotFoundError: Raised whe a base directory is specified, how this is incorrect. It will prompt you to double check this. 
-    """
-    try:
-    
-        if not base_directory:
-            raise KeyError(f"Please specify a base directory in the '.env' file.")
-
-        if not os.path.isdir(base_directory):
-            raise FileNotFoundError(f"Base directory '{base_directory}' does not exist") 
-        
-    except KeyError as key_error:
-        
-        global_error_handler("Missing base directory in your .env file",f"The key for the base directory within your .env file is missing. {key_error}")
-        
-        return False
-
-    except FileNotFoundError as e:
-        
-        global_error_handler("The specified base directory in your .env file is invalid", f"Unfortunately we unable to find the {base_directory} on the system. - {e}")
-        
-        return False
-    
-    return True
+github_owner    = os.getenv("GITHUB_USERNAME")    
+BASE_DIRECTORY  = get_extract_to_directory()   
 
 def get_latest_release_zip_url(repo:str) -> str:
     """
@@ -197,15 +165,15 @@ def check_for_updates():
     
     updated_software_packages = []
 
-    if not base_directory_validation(base_directory):
+    if BASE_DIRECTORY is None:
                 
         return
             
     try:
         
-        for software_package in os.listdir(base_directory):
+        for software_package in os.listdir(BASE_DIRECTORY):
             
-            cwd = os.path.join(base_directory, software_package)
+            cwd = os.path.join(BASE_DIRECTORY, software_package)
             
             if software_package not in REPO_MAPPING:
 
