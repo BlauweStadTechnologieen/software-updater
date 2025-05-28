@@ -95,7 +95,7 @@ def send_message(software_updates:list, mime_type:str = "html") -> None:
             return None
         
     except smtplib.SMTPAuthenticationError as authentication_error_message:
-        error_handler.global_error_handler("SMTP Authentication Error","f{authentication_error_message}")
+        error_handler.global_error_handler("SMTP Authentication Error",f"{authentication_error_message}")
 
     except smtplib.SMTPConnectError as connection_error_message:
         error_handler.global_error_handler("SMTP Connection Error",f"{connection_error_message}")
