@@ -6,7 +6,7 @@ import zipfile
 import io
 import requests
 from get_extract_to_directory import get_extract_to_directory
-from install_new_dependencies import check_and_install_new_dependencies
+from install_new_dependencies import update_requirements
 load_dotenv()
 
 github_owner    = os.getenv("GITHUB_USERNAME")    
@@ -201,16 +201,18 @@ def check_for_updates():
             if not install_updates(github_repo, cwd):
                 
                 continue
-
+            
             venv_dir = os.path.join(cwd, ".venv")
 
             if os.path.exists(venv_dir):
             
-                print(f"Virtual environment found for {software_package} at {venv_dir}.")
+                if not update_requirements(cwd):
+
+                    break
                 
             else:
 
-                print(f"Virtual environment not found for {software_package}. Please ensure it is created before running the updater.")
+                print(f"Virtual environment not found for {software_package}. Skipping the installation of dependancies.")
             
             updated_software_packages.append(software_package)
         
