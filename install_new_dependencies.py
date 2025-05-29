@@ -51,3 +51,43 @@ def check_and_install_new_dependencies(requirements_file:str ="requirements.txt"
             custom_subject = "Dependancy installation failure"
             error_handler.global_error_handler(custom_subject, custom_message)
             return
+        
+
+def update_requirements(cwd: str) -> bool:
+    """
+    Installs or updates dependencies from requirements.txt using the virtual environment.
+
+    Args:
+        cwd (str): The path to the directory containing the .venv and requirements.txt
+
+    Returns:
+        bool: True if installation succeeds, False otherwise.
+    """
+    pip_executable = os.path.join(cwd, ".venv", "Scripts", "pip.exe")
+    
+    requirements_path = os.path.join(cwd, "requirements.txt")
+
+    if not os.path.exists(pip_executable) or not os.path.exists(requirements_path):
+        
+        custom_message = "Virtual environment or requirements.txt not found."
+        custom_subject = "Dependency Installation Error"
+        
+        error_handler.global_error_handler(custom_subject, custom_message)
+
+        return False
+
+    try:
+        subprocess.run([pip_executable, "install", "-r", requirements_path], check=True)
+        
+        print("Dependencies updated successfully.")
+
+        return True
+
+    except subprocess.CalledProcessError as e:
+
+        custom_message = f"Failed to install dependencies: {e}"
+        custom_subject = "Dependency Installation Failure"
+
+        error_handler.global_error_handler(custom_subject, custom_message)
+
+        return False
