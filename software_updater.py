@@ -6,6 +6,7 @@ import zipfile
 import io
 import requests
 from get_extract_to_directory import get_extract_to_directory
+from install_new_dependencies import check_and_install_new_dependencies
 load_dotenv()
 
 github_owner    = os.getenv("GITHUB_USERNAME")    
@@ -200,6 +201,8 @@ def check_for_updates():
             if not install_updates(github_repo, cwd):
                 
                 continue
+
+            check_and_install_new_dependencies()
             
             updated_software_packages.append(software_package)
         
