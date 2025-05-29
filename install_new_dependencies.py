@@ -49,6 +49,5 @@ def check_and_install_new_dependencies(requirements_file:str ="requirements.txt"
         except subprocess.CalledProcessError as e:
             custom_message = f"Failed to install dependencies: {e}"
             custom_subject = "Dependancy installation failure"
-            print(f"Failed to install dependencies: {e} {custom_message}{custom_subject}")
             error_handler.global_error_handler(custom_subject, custom_message)
             return
