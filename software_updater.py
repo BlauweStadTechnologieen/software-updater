@@ -7,7 +7,6 @@ import io
 import requests
 from get_extract_to_directory import get_extract_to_directory
 load_dotenv()
-load_dotenv("dev.env")
 
 github_owner    = os.getenv("GITHUB_USERNAME")    
 BASE_DIRECTORY  = get_extract_to_directory()   
@@ -147,6 +146,7 @@ def install_updates(repo_name, target_dir):
         return False
 
 def check_for_updates():
+    
     """
     Loops through all of the specified directories by constructing each directory, checks for their validity, checks for any changes before installing them.
     This will check the validity of the base directory first. If this fails, the script will exit early.
@@ -155,6 +155,10 @@ def check_for_updates():
     Any exceptions or error will be handles and processed by the `error_handler` module.
     """
     
+    if BASE_DIRECTORY is None: 
+                
+        return
+    
     REPO_MAPPING = {
 
         "software-updater"          : "software-updater",
@@ -162,12 +166,22 @@ def check_for_updates():
         "vm-status-monitor"         : "azure-vm-monitor",
         "create-virtual-environment": "create-virtual-environment",
     }
+
+    try:
+    
+        for package in REPO_MAPPING.keys():
+            
+            extract_to = os.path.join(BASE_DIRECTORY, package)
+            
+            os.makedirs(extract_to, exist_ok=True)
+
+    except Exception as e:
+
+        global_error_handler("Directory Creation Error", f"Failed to create directory for {package}: {e}")
+
+        return
     
     updated_software_packages = []
-
-    if BASE_DIRECTORY is None:
-                
-        return
             
     try:
         
