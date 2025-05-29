@@ -26,7 +26,7 @@ def get_extract_to_directory() -> str:
     
     except KeyError as e:
         
-        global_error_handler("Missing EXTRACT_TO environment variable", f"Please ensure that the EXTRACT_TO variable is set in your .env file. {e}")
+        global_error_handler("Missing EXTRACT_TO environment variable", f"{e}")
         
         return None
     
