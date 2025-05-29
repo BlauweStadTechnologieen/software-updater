@@ -202,7 +202,15 @@ def check_for_updates():
                 
                 continue
 
-            check_and_install_new_dependencies()
+            venv_dir = os.path.join(cwd, ".venv")
+
+            if os.path.exists(venv_dir):
+            
+                print(f"Virtual environment found for {software_package} at {venv_dir}.")
+                
+            else:
+
+                print(f"Virtual environment not found for {software_package}. Please ensure it is created before running the updater.")
             
             updated_software_packages.append(software_package)
         
