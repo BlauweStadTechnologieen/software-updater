@@ -167,20 +167,18 @@ def check_for_updates():
         "vm-status-monitor"         : "azure-vm-monitor",
         "create-virtual-environment": "create-virtual-environment",
     }
-
-    try:
     
-        for package in REPO_MAPPING.keys():
-            
+    for package in REPO_MAPPING.keys():
+        
+        try:
+        
             extract_to = os.path.join(BASE_DIRECTORY, package)
             
             os.makedirs(extract_to, exist_ok=True)
 
-    except Exception as e:
+        except Exception as e:
 
-        global_error_handler("Directory Creation Error", f"Failed to create directory for {package}: {e}")
-
-        return
+            global_error_handler("Directory Creation Error", f"Failed to create directory for {package}: {e}")
     
     updated_software_packages = []
             
