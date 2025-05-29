@@ -212,7 +212,7 @@ def check_for_updates():
                 
             else:
 
-                print(f"Virtual environment not found for {software_package}. Skipping the installation of dependancies.")
+                print(f"Virtual environment not found for {software_package}. Skipping the installation of dependancies. You will need to create a .venv and install the requirements manually.")
             
             updated_software_packages.append(software_package)
         
