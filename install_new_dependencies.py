@@ -63,11 +63,11 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
     Returns:
         bool: True if installation succeeds, False otherwise.
     """
-    pip_executable = os.path.join(cwd, ".venv", "Scripts", "pip.exe")
     
+    pip_executable = os.path.join(cwd, ".venv", "Scripts", "pip.exe")
     requirements_path = os.path.join(cwd, dependancy_filename)
 
-    if not os.path.exists(pip_executable) or not os.path.exists(requirements_path):
+    if not os.path.isdir(pip_executable) or not os.path.isdir(requirements_path):
         
         custom_message = "Virtual environment or requirements.txt not found."
         custom_subject = "Dependency Installation Error"
@@ -77,6 +77,7 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
         return False
 
     try:
+        
         subprocess.run([pip_executable, "install", "-r", requirements_path], check=True)
         
         print("Dependencies updated successfully.")

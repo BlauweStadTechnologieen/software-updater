@@ -202,7 +202,7 @@ def check_for_updates():
             
             venv_dir = os.path.join(cwd, ".venv")
 
-            if os.path.exists(venv_dir):
+            if os.path.isdir(venv_dir):
             
                 if not update_requirements(cwd):
 
