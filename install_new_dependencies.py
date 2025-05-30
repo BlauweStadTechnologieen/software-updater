@@ -53,7 +53,7 @@ def check_and_install_new_dependencies(requirements_file:str ="requirements.txt"
             return
         
 
-def update_requirements(cwd: str) -> bool:
+def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") -> bool:
     """
     Installs or updates dependencies from requirements.txt using the virtual environment.
 
@@ -65,7 +65,7 @@ def update_requirements(cwd: str) -> bool:
     """
     pip_executable = os.path.join(cwd, ".venv", "Scripts", "pip.exe")
     
-    requirements_path = os.path.join(cwd, "requirements.txt")
+    requirements_path = os.path.join(cwd, dependancy_filename)
 
     if not os.path.exists(pip_executable) or not os.path.exists(requirements_path):
         
