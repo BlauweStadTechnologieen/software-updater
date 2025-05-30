@@ -67,7 +67,7 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
     pip_executable = os.path.join(cwd, ".venv", "Scripts", "pip.exe")
     requirements_path = os.path.join(cwd, dependancy_filename)
 
-    if not os.path.isdir(pip_executable) or not os.path.isdir(requirements_path):
+    if not os.path.exists(pip_executable) or not os.path.exists(requirements_path):
         
         custom_message = "Virtual environment or requirements.txt not found."
         custom_subject = "Dependency Installation Error"
@@ -78,7 +78,16 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
 
     try:
         
-        subprocess.run([pip_executable, "install", "-r", requirements_path], check=True)
+        print("Updating dependencies...")
+
+        subprocess.run([pip_executable, "install", "--upgrade", "-r", requirements_path], check=True)
+
+        with open(requirements_path, "w") as req_file:
+            pip_freeze = subprocess.run([pip_executable, "freeze"], stdout=req_file, check=True)
+
+            if pip_freeze.returncode != 0:
+                
+                raise subprocess.CalledProcessError(pip_freeze.returncode, pip_freeze.stderr, "pip freeze command failed")
         
         print("Dependencies updated successfully.")
 
@@ -92,3 +101,11 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
         error_handler.global_error_handler(custom_subject, custom_message)
 
         return False
+    
+    except Exception as e:
+        custom_message = f"An unexpected error occurred: {e}"
+        custom_subject = "Unexpected Error in Dependency Installation"
+
+        error_handler.global_error_handler(custom_subject, custom_message)
+
+        return False    
