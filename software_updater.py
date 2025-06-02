@@ -109,6 +109,10 @@ def install_updates(repo_name, target_dir) -> bool:
     zip_url         = f"https://github.com/{github_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
     zip_path        = os.path.join(target_dir, "temp_repo.zip")
 
+    if not version_check(repo_name, target_dir):
+        
+        return False
+    
     try:
         response = requests.get(zip_url)
         response.raise_for_status()
@@ -144,7 +148,7 @@ def install_updates(repo_name, target_dir) -> bool:
         
         return False
     
-def version_check(cwd:str, repo_name:str) -> bool:
+def version_check(repo_name:str, cwd:str) -> bool:
     """
     Checks if the latest version of the repository is already installed.
     Args:
@@ -204,7 +208,7 @@ def version_check(cwd:str, repo_name:str) -> bool:
         else:
 
             raise Exception(f"Failed to fetch latest release data: {response.status_code} - {response.text}")
-            
+                    
     except requests.RequestException as e:
         
         global_error_handler("Version Check Error", f"An error occurred while checking the version of {repo_name}: {e}")
@@ -212,6 +216,7 @@ def version_check(cwd:str, repo_name:str) -> bool:
         return False
 
     except Exception as e:
+        
         global_error_handler("Version Check Error", f"An unexpected error occurred while checking the version of {repo_name}: {e}")
 
         return False
@@ -265,10 +270,6 @@ def check_for_updates():
                 continue
 
             github_repo = REPO_MAPPING[software_package]
-
-            if not version_check(cwd, github_repo):
-
-                continue
             
             if not install_updates(github_repo, cwd):
                 
