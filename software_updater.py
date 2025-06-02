@@ -101,15 +101,13 @@ def get_latest_tag(repo_name:str) -> dict:
         
         return None
 
-def install_updates(repo_name, target_dir):
+def install_updates(repo_name, target_dir) -> bool:
     """
     Downloads and extracts the GitHub repo as a ZIP into the target_dir (flattened).
     """
-    release_tag = get_latest_tag(repo_name)
-
-    zip_url = f"https://github.com/{github_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
-
-    zip_path = os.path.join(target_dir, "temp_repo.zip")
+    release_tag     = get_latest_tag(repo_name)
+    zip_url         = f"https://github.com/{github_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
+    zip_path        = os.path.join(target_dir, "temp_repo.zip")
 
     try:
         response = requests.get(zip_url)
@@ -144,6 +142,78 @@ def install_updates(repo_name, target_dir):
         
         global_error_handler("Installation failure", f"Failed to update {repo_name}: {e}")
         
+        return False
+    
+def version_check(cwd:str, repo_name:str) -> bool:
+    """
+    Checks if the latest version of the repository is already installed.
+    Args:
+        repo_name (str): The name of the repository to check.
+    Returns:
+        bool: True if the latest version is installed, False otherwise.
+    """
+    
+    try:
+    
+        api_url = f"https://api.github.com/repos/{github_owner}/{repo_name}/releases"
+
+        release_file = "current_release.txt"
+
+        release_file_dir = os.path.join(cwd, release_file)
+        
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            
+            release_data = response.json()
+
+            if not release_data:
+                
+                global_error_handler("No releases found", "This repository has no releases available.")
+
+                return False
+
+            if os.path.exists(release_file_dir):
+                
+                with open(release_file_dir, "r") as f:
+
+                    stored_release = f.read().strip()
+
+            else:
+
+                stored_release = None
+
+            latest_release = release_data[0]["tag_name"]
+
+            print(stored_release, latest_release)
+
+            if stored_release != latest_release:
+
+                with open(release_file_dir, "w") as f:
+
+                    f.write(latest_release)
+
+                    return True
+                
+            else:
+                
+                print("No new release found, current version is up to date.")
+                
+                return False
+
+        else:
+
+            raise Exception(f"Failed to fetch latest release data: {response.status_code} - {response.text}")
+            
+    except requests.RequestException as e:
+        
+        global_error_handler("Version Check Error", f"An error occurred while checking the version of {repo_name}: {e}")
+
+        return False
+
+    except Exception as e:
+        global_error_handler("Version Check Error", f"An unexpected error occurred while checking the version of {repo_name}: {e}")
+
         return False
 
 def check_for_updates():
@@ -195,6 +265,10 @@ def check_for_updates():
                 continue
 
             github_repo = REPO_MAPPING[software_package]
+
+            if not version_check(cwd, github_repo):
+
+                continue
             
             if not install_updates(github_repo, cwd):
                 
