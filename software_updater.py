@@ -105,9 +105,9 @@ def install_updates(repo_name, target_dir) -> bool:
     """
     Downloads and extracts the GitHub repo as a ZIP into the target_dir (flattened).
     """
-    release_tag     = get_latest_tag(repo_name)
-    zip_url         = f"https://github.com/{github_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
-    zip_path        = os.path.join(target_dir, "temp_repo.zip")
+    release_tag = get_latest_tag(repo_name)
+    zip_url     = f"https://github.com/{github_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
+    zip_path    = os.path.join(target_dir, "temp_repo.zip")
 
     if not version_check(repo_name, target_dir):
         

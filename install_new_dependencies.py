@@ -64,8 +64,8 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
         bool: True if installation succeeds, False otherwise.
     """
     
-    pip_executable = os.path.join(cwd, ".venv", "Scripts", "pip.exe")
-    requirements_path = os.path.join(cwd, dependancy_filename)
+    pip_executable      = os.path.join(cwd, ".venv", "Scripts", "pip.exe")
+    requirements_path   = os.path.join(cwd, dependancy_filename)
 
     if not os.path.exists(pip_executable) or not os.path.exists(requirements_path):
         
@@ -83,6 +83,7 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
         subprocess.run([pip_executable, "install", "--upgrade", "-r", requirements_path], check=True)
 
         with open(requirements_path, "w") as req_file:
+            
             pip_freeze = subprocess.run([pip_executable, "freeze"], stdout=req_file, check=True)
 
             if pip_freeze.returncode != 0:
