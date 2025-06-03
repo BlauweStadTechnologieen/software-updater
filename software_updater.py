@@ -273,9 +273,9 @@ def check_for_updates():
                 
                 continue
 
-            github_repo = REPO_MAPPING[software_package]
+            remote_git_repo = REPO_MAPPING[software_package]
             
-            if not install_updates(github_repo, cwd):
+            if not install_updates(remote_git_repo, cwd):
                 
                 continue
             
