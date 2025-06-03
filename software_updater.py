@@ -248,6 +248,10 @@ def check_for_updates():
         try:
         
             extract_to = os.path.join(BASE_DIRECTORY, package)
+
+            if not os.path.exists(extract_to):
+                
+                continue
             
             os.makedirs(extract_to, exist_ok=True)
 
