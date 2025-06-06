@@ -193,7 +193,7 @@ def create_venv(cwd:str, update_name:str) -> None:
                             
     return create_venv.stdout
     
-def create_files() -> None:
+def create_env_files(cwd:str) -> None:
     
     """
     Scans all subdirectories in a specified base directory and creates a Python virtual environment (.venv)
@@ -204,32 +204,14 @@ def create_files() -> None:
 
     try:
 
-        BASE_DIR = get_extract_to()
-    
-        if BASE_DIR is None: 
+        create_venv(cwd)
+
+        create_bat_file(cwd) 
+                    
+        create_env(cwd)
             
-            return None
-         
-        for package in os.listdir(BASE_DIR):
-
-            cwd = os.path.join(BASE_DIR, package) 
-
-            if create_venv(cwd, package) is None:
-
-                break
-
-            if create_bat_file(cwd) is None:
-                
-                break
+        create_gitignore(cwd) 
             
-            if create_env(cwd) is None:
-                
-                break
-
-            if create_gitignore(cwd) is None:
-                
-                break
-
         print("All files created successfully.")
                 
     except Exception as e:
@@ -237,6 +219,3 @@ def create_files() -> None:
         custom_message =f"Exception Error {e}"
         
         print(custom_message)
-
-if __name__ == "__main__":
-    create_files()
