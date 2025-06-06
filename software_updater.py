@@ -3,10 +3,11 @@ from dotenv import load_dotenv
 from error_handler import global_error_handler
 import send_message as message
 import zipfile
-import io
 import requests
 from get_extract_to_directory import get_extract_to_directory
 from install_new_dependencies import update_requirements
+
+
 load_dotenv()
 
 github_owner    = os.getenv("GITHUB_USERNAME")    
