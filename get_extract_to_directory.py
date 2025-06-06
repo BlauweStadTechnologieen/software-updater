@@ -1,4 +1,4 @@
-from extract_to import EXTRACT_TO
+from root import EXTRACT_TO
 import os
 from error_handler import global_error_handler
 
