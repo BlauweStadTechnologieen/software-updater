@@ -255,6 +255,10 @@ def check_for_updates():
             
             os.makedirs(extract_to, exist_ok=True)
 
+        except OSError as e:
+            
+            global_error_handler("Directory Creation Error", f"Failed to create directory for {package}: {e}")
+            
         except Exception as e:
 
             global_error_handler("Directory Creation Error", f"Failed to create directory for {package}: {e}")
