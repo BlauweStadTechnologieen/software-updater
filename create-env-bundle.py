@@ -1,7 +1,7 @@
 import os
 import subprocess
-import dotenv_content
-from extract_to import EXTRACT_TO
+from dotenv_constants import dotenv_constants
+from root import EXTRACT_TO
 
 def run_command(cmd: str, cwd:str) -> None:
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
@@ -149,7 +149,7 @@ def create_env(cwd: str) -> str:
 
             print(f"Creating keys & values in {env_file}...")
             
-            for key, value in dotenv_content.prepopulated_env_vars.items():
+            for key, value in dotenv_constants.items():
                 
                 f.write(f"{key}='{value}'\n")
 
