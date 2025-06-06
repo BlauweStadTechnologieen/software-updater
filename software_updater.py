@@ -6,8 +6,7 @@ import zipfile
 import requests
 from get_extract_to_directory import get_extract_to_directory
 from install_new_dependencies import update_requirements
-
-
+from create_env_bundle import create_env_files
 load_dotenv()
 
 github_owner    = os.getenv("GITHUB_USERNAME")    
@@ -256,6 +255,10 @@ def check_for_updates():
             
             os.makedirs(extract_to, exist_ok=True)
 
+            if not create_env_files(extract_to):
+
+                continue
+
         except OSError as e:
             
             global_error_handler("Directory Creation Error", f"Failed to create directory for {package}: {e}")
@@ -302,11 +305,13 @@ def check_for_updates():
                         
             message.send_message(updated_software_packages)
 
+    except OSError as e:
+
+        global_error_handler("OS Error","There was an error when running a subprocess")
+    
     except Exception as e:
                     
         global_error_handler("Error in checking for updates", f"Unfortunately, there was an error in checking for updates. Please find the following error message {e}")
         
-        return
-
 if __name__ == "__main__":
     check_for_updates()
