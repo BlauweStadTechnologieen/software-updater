@@ -1,4 +1,4 @@
-prepopulated_env_vars = {
+dotenv_constants = {
     "BASE_DIRECTORY":"<YOUR BASE DIRECTORY>",
     "PARENT_DIRECTORY":"<PARENT DIRECTORY>",
     "FRESHDESK_DOMAIN":"<YOUR FRESHDESK DOMAIN>",
