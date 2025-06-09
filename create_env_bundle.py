@@ -6,7 +6,7 @@ from root import DIR_ROOT
 def run_command(cmd: str, cwd:str) -> None:
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
 
-def get_DIR_ROOT() -> str:
+def get_DIR_ROOT() -> str | None:
     """
     Retrieves the base directory where packages are extracted.
     Returns:
@@ -48,7 +48,7 @@ def get_DIR_ROOT() -> str:
         return None
 
 
-def create_gitignore(cwd: str) -> str:
+def create_gitignore(cwd: str) -> str | None:
     """
     Creates a '.gitignore' file in the specified current working directory (cwd).
     This file is used to specify files and directories that should be ignored by Git.
@@ -87,7 +87,7 @@ def create_gitignore(cwd: str) -> str:
 
         return None
 
-def create_bat_file(cwd: str) -> str:
+def create_bat_file(cwd: str) -> str | None:
     """
     Creates a 'run.bat' file in the specified current working directory (cwd).
     This file is typically used to run the Python application in the virtual environment.
@@ -129,7 +129,7 @@ def create_bat_file(cwd: str) -> str:
 
         return None
 
-def create_env(cwd: str) -> str:
+def create_env(cwd: str) -> str | None:
     """
     Creates a '.env' file in the specified current working directory (cwd).
     This file is typically used to store environment variables, not related to the Python virtual environment itself.
@@ -176,7 +176,7 @@ def create_env(cwd: str) -> str:
 
         return None
 
-def create_venv(cwd:str) -> None:
+def create_venv(cwd:str) -> str | None:
     """
     Creates a Python virtual environment in each subdirectory of a specified base directory.
     If a virtual environment already exists, it installs dependencies from requirements.txt if present.
@@ -202,7 +202,7 @@ def create_venv(cwd:str) -> None:
                             
     return create_venv.stdout
     
-def create_env_files(cwd:str) -> None:
+def create_env_files(cwd:str) -> bool:
     
     """
     Scans all subdirectories in a specified base directory and creates a Python virtual environment (.venv)
@@ -215,18 +215,20 @@ def create_env_files(cwd:str) -> None:
 
     try:
 
-        create_venv(cwd)
+        for fn in (create_venv, create_bat_file, create_env, create_gitignore):
+            
+            result = fn(cwd)
 
-        create_bat_file(cwd) 
-                    
-        create_env(cwd)
-            
-        create_gitignore(cwd) 
-            
+            if result is None:
+                
+                return False
+               
         print("All files created successfully.")
+
+        return True
                 
     except Exception as e:
         
-        custom_message =f"Exception Error {e}"
+        custom_message =f"Error in creating env bundle {e}"
         
         print(custom_message)
