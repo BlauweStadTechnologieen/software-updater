@@ -1,4 +1,4 @@
-from root import EXTRACT_TO
+from root import DIR_ROOT
 import os
 from error_handler import global_error_handler
 
@@ -8,30 +8,31 @@ def get_extract_to_directory() -> str:
     Returns:
         str: The path of the base directory.
     Exceptions:
-        KeyError: Raised when the EXTRACT_TO environment variable is not set.
-        FileNotFoundError: Raised when the specified EXTRACT_TO directory does not exist.
+        KeyError: Raised when the DIR_ROOT environment variable is not set.
+        FileNotFoundError: Raised when the specified DIR_ROOT directory does not exist.
+
     """
     
     try:
         
-        if not EXTRACT_TO:
+        if not DIR_ROOT:
             
-            raise KeyError("EXTRACT_TO environment variable is not set.")
+            raise KeyError("DIR_ROOT environment variable is not set.")
         
-        if not os.path.exists(EXTRACT_TO):
+        if not os.path.exists(DIR_ROOT):
             
-            raise FileNotFoundError(f"The specified EXTRACT_TO directory '{EXTRACT_TO}' does not exist.")
-                
-        return EXTRACT_TO
+            raise FileNotFoundError(f"The specified DIR_ROOT directory '{DIR_ROOT}' does not exist.")
+                        
+        return DIR_ROOT
     
     except KeyError as e:
         
-        global_error_handler("Missing EXTRACT_TO environment variable", f"{e}")
+        global_error_handler("Missing DIR_ROOT environment variable", f"{e}")
         
         return None
     
     except FileNotFoundError as e:
         
-        global_error_handler("Invalid EXTRACT_TO directory", f"The specified EXTRACT_TO directory '{EXTRACT_TO}' does not exist. Please check the path. {e}")
+        global_error_handler("Invalid DIR_ROOT directory", f"The specified DIR_ROOT directory '{DIR_ROOT}' does not exist. Please check the path. {e}")
         
         return None
