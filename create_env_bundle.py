@@ -1,31 +1,33 @@
 import os
 import subprocess
 from dotenv_constants import dotenv_constants
-from root import EXTRACT_TO
+from root import DIR_ROOT
 
 def run_command(cmd: str, cwd:str) -> None:
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
 
-def get_extract_to() -> str:
+def get_DIR_ROOT() -> str:
     """
     Retrieves the base directory where packages are extracted.
     Returns:
         str: The base directory path.
     Raises:
-        KeyError: If the EXTRACT_TO constant is not defined.
+        KeyError: If the DIR_ROOT constant is not defined.
         FileNotFoundError: If the specified base directory does not exist.
     """
     
     try:
-        if not EXTRACT_TO:
+        if not DIR_ROOT:
             
             raise KeyError("You must define a directory where all software packages will be extracted to.")
         
-        if not os.path.isdir(EXTRACT_TO):
+        if not os.path.isdir(DIR_ROOT):
             
-            raise FileNotFoundError(f"Base Directory {EXTRACT_TO} does not exist.")
+            raise FileNotFoundError(f"Base Directory {DIR_ROOT} does not exist.")
         
-        return EXTRACT_TO
+        print("Root directory is validated...")
+        
+        return DIR_ROOT
         
     except FileNotFoundError as e:
         
@@ -38,6 +40,13 @@ def get_extract_to() -> str:
         print(f"Base Directory not specified: {e}")
 
         return None 
+    
+    except Exception as e:
+
+        print(f"General Exception Error {e}")
+
+        return None
+
 
 def create_gitignore(cwd: str) -> str:
     """
@@ -53,6 +62,8 @@ def create_gitignore(cwd: str) -> str:
     """
     
     gitignore_file = os.path.join(cwd, ".gitignore")
+
+    print("Now we are creating the .gitignore file...")
 
     if os.path.exists(gitignore_file):
         
@@ -89,7 +100,7 @@ def create_bat_file(cwd: str) -> str:
         - If an exception occurs during file creation, it prints a custom error message.
     """
     
-    print("Creating run.bat file...")
+    print("Next, we are creating run.bat file...")
 
     bat_file = os.path.join(cwd, "run.bat")
 
@@ -131,7 +142,7 @@ def create_env(cwd: str) -> str:
         - If an exception occurs during file creation, it prints a custom error message.
     """
 
-    print("Creating .env file...")
+    print("Now we're creating .env file...")
 
     env_file = os.path.join(cwd, ".env")
 
@@ -165,22 +176,20 @@ def create_env(cwd: str) -> str:
 
         return None
 
-def create_venv(cwd:str, update_name:str) -> None:
+def create_venv(cwd:str) -> None:
     """
     Creates a Python virtual environment in each subdirectory of a specified base directory.
     If a virtual environment already exists, it installs dependencies from requirements.txt if present.
     Handles errors for missing base directory, missing subdirectories, and command failures.
     Prints status messages for each subdirectory.
     """
-
-    print(f"Creating virtual environment in {update_name}...")
             
+    print("Now we're creaing the Virtual Environment...")
+    
     venv_path = os.path.join(cwd, ".venv")
 
     if os.path.exists(venv_path) and os.listdir(venv_path):
-        
-        print(f"{update_name.title()} already has a Virtual Environment installed.")
-        
+                
         return venv_path
 
     create_venv = run_command(["python","-m", "venv", ".venv"], cwd)
@@ -201,6 +210,8 @@ def create_env_files(cwd:str) -> None:
     dependencies from requirements.txt if present. Handles errors for missing base directory, missing subdirectories,
     and command failures, and prints status messages for each subdirectory.
     """
+
+    print("Lastly, we're creating the .env file...")
 
     try:
 
