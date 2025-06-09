@@ -2,7 +2,7 @@ from root import DIR_ROOT
 import os
 from error_handler import global_error_handler
 
-def get_extract_to_directory() -> str:
+def get_extract_to_directory() -> str | None:
     """
     Retrieves the base directory from the environment variable.
     Returns:

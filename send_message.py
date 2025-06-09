@@ -69,7 +69,7 @@ def send_message(software_updates:list, mime_type:str = "html") -> None:
 
     if not smtp_authentication():
         
-        return
+        return None
     
     try:
         

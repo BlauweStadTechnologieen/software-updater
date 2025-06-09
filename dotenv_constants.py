@@ -17,4 +17,3 @@ dotenv_constants = {
     "SENDER_DOMAIN":"<SENDER DOMAIN>",
     "VERSION_FOLDER":"<VERSION FOLDER>",
 }
-
