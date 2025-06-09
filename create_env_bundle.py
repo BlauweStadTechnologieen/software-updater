@@ -211,7 +211,7 @@ def create_env_files(cwd:str) -> bool:
     and command failures, and prints status messages for each subdirectory.
     """
 
-    print("Lastly, we're creating the .env file...")
+    print("Lastly, we're validating the success of failure of all env files within the bundle...")
 
     try:
 
@@ -219,7 +219,9 @@ def create_env_files(cwd:str) -> bool:
             
             result = fn(cwd)
 
-            if result is None:
+            if result is None or result is False:
+
+                print(f"{fn.__name__} failed.")
                 
                 return False
                
@@ -232,3 +234,5 @@ def create_env_files(cwd:str) -> bool:
         custom_message =f"Error in creating env bundle {e}"
         
         print(custom_message)
+
+        return False
