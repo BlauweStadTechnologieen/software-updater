@@ -10,7 +10,7 @@ from create_env_bundle import create_env_files
 load_dotenv()
 
 github_owner    = os.getenv("GITHUB_USERNAME")    
-BASE_DIRECTORY  = get_extract_to_directory()   
+BASE_DIRECTORY  = get_extract_to_directory()  
 
 def get_latest_release_zip_url(repo:str) -> str:
     """
@@ -234,7 +234,7 @@ def check_for_updates():
     if BASE_DIRECTORY is None: 
                 
         return
-    
+        
     REPO_MAPPING = {
 
         "software-updater"          : "software-updater",
@@ -242,6 +242,7 @@ def check_for_updates():
         "vm-status-monitor"         : "azure-vm-monitor",
         "create-virtual-environment": "create-virtual-environment",
     }
+
     
     for package in REPO_MAPPING.keys():
         
@@ -249,7 +250,7 @@ def check_for_updates():
         
             extract_to = os.path.join(BASE_DIRECTORY, package)
 
-            if not os.path.exists(extract_to):
+            if os.path.exists(extract_to):
                 
                 continue
             
@@ -302,6 +303,8 @@ def check_for_updates():
             updated_software_packages.append(software_package)
         
         if updated_software_packages:
+
+            print("Updated Packages")
                         
             message.send_message(updated_software_packages)
 
