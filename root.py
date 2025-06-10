@@ -1,1 +1,2 @@
 DIR_ROOT=""
+GITHUB_TOKEN=""
