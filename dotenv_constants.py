@@ -1,7 +1,5 @@
-from init_constants import DIR_ROOT
-
 dotenv_constants = {
-    "BASE_DIRECTORY":f"{DIR_ROOT}",
+    "BASE_DIRECTORY":"<BASE_DIRECTORY>",
     "FRESHDESK_DOMAIN":"<FRESHDESK_DOMAIN>",
     "FRESHDESK_API":"<FRESHDESK_API>",
     "GITHUB_USERNAME":"<GIT USERNAME>",
