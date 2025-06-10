@@ -5,13 +5,12 @@ import send_message as message
 import zipfile
 import requests
 from requests.exceptions import HTTPError
-from get_extract_to_directory import get_extract_to_directory
 from install_new_dependencies import update_requirements
 from create_env_bundle import create_env_files
 load_dotenv()
 
 github_owner    = os.getenv("GITHUB_USERNAME")    
-BASE_DIRECTORY  = get_extract_to_directory()  
+BASE_DIRECTORY  = os.getenv("BASE_DIRECTORY") 
 
 def get_latest_release_zip_url(repo:str) -> str:
     """
@@ -279,7 +278,7 @@ def check_for_updates():
 
             if not create_env_files(extract_to):
 
-                continue
+                break
 
         except OSError as e:
             

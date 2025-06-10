@@ -1,52 +1,9 @@
 import os
 import subprocess
 from dotenv_constants import dotenv_constants
-from init_constants import DIR_ROOT
 
 def run_command(cmd: str, cwd:str) -> None:
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
-
-def get_DIR_ROOT() -> str | None:
-    """
-    Retrieves the base directory where packages are extracted.
-    Returns:
-        str: The base directory path.
-    Raises:
-        KeyError: If the DIR_ROOT constant is not defined.
-        FileNotFoundError: If the specified base directory does not exist.
-    """
-    
-    try:
-        if not DIR_ROOT:
-            
-            raise KeyError("You must define a directory where all software packages will be extracted to.")
-        
-        if not os.path.isdir(DIR_ROOT):
-            
-            raise FileNotFoundError(f"Base Directory {DIR_ROOT} does not exist.")
-        
-        print("Root directory is validated...")
-        
-        return DIR_ROOT
-        
-    except FileNotFoundError as e:
-        
-        print(f"Base Directory not found: {e}")
-        
-        return None
-
-    except KeyError as e:
-        
-        print(f"Base Directory not specified: {e}")
-
-        return None 
-    
-    except Exception as e:
-
-        print(f"General Exception Error {e}")
-
-        return None
-
 
 def create_gitignore(cwd: str) -> str | None:
     """
@@ -159,6 +116,14 @@ def create_env(cwd: str) -> str | None:
             f.write("# Environment variables\n# These are mandatory for the application to run\n# Contact Support: hello@bluecitycapital.com\n\n")
 
             print(f"Creating keys & values in {env_file}...")
+
+            GUTHUB_PERSONAL_ACCESS_TOKEN = input("Please input your GutHub Personal Access Token.....").strip()
+            
+            f.write(f"GITHUB_TOKEN='{GUTHUB_PERSONAL_ACCESS_TOKEN}'\n")
+
+            DIR_ROOT = input("Now please enter the directory root....").strip()
+
+            f.write(f"BASE_DIRECTORY='{DIR_ROOT}'\n")
             
             for key, value in dotenv_constants.items():
                 
