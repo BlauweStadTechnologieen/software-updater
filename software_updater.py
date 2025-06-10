@@ -109,7 +109,6 @@ def get_latest_tag(repo_name:str) -> dict:
         global_error_handler("GitHub API HTTP Error", f"HTTP error occurred while fetching tags for {repo_name}: {e}")
         
         return None
-        return None
     
     except requests.RequestException as e:
         
