@@ -240,6 +240,62 @@ def version_check(repo_name:str, cwd:str) -> bool:
         global_error_handler("Version Check Error", f"An unexpected error occurred while checking the version of {repo_name}: {e}")
 
         return False
+    
+import os
+
+def validate_base_directory() -> str:
+    
+    while True:
+
+        try:
+
+            root_directory = input("Please enter the base directory: ").strip()
+
+            if not root_directory:
+                raise ValueError("No directory path was provided.")
+            
+            if not os.path.exists(root_directory):
+                raise FileNotFoundError(f"The path '{root_directory}' does not exist.")
+            
+            if not os.path.isdir(root_directory):
+                raise NotADirectoryError(f"The path '{root_directory}' is not a directory.")
+            
+            return root_directory
+
+        except (ValueError, FileNotFoundError, NotADirectoryError) as e:
+
+            global_error_handler("Invalid base directory", str(e))
+
+            print("Please try again.\n")
+
+def validate_personal_access_token() -> str | None:
+
+    while True:
+    
+        try:
+        
+            personal_access_token = input("Please enter your Gethub Personal Access Token (PAT).....").strip()
+            
+            if not personal_access_token:
+
+                raise KeyError("No Personal Access Token was speficied, this is a mandatory entry....")
+            
+            if len(personal_access_token) < 7:
+
+                raise ValueError("Invalid Personal Access Token length")
+            
+            headers = {"Authorization": f"token {personal_access_token}"}
+            response = requests.get("https://api.github.com/user", headers=headers)
+            
+            response.raise_for_status()
+            
+            return personal_access_token
+        
+        except (HTTPError, KeyError, ValueError) as e:
+
+            global_error_handler("Invalid Personal Access Token",f"{e}")
+            
+            print("Please try and enter your access token again.")
 
 def check_for_updates():
     
@@ -250,11 +306,18 @@ def check_for_updates():
     -
     Any exceptions or error will be handles and processed by the `error_handler` module.
     """
-    
-    if BASE_DIRECTORY is None: 
-                
+
+    root_directory          = validate_base_directory()
+    personal_access_token   = validate_personal_access_token()
+
+    if not root_directory:
+
         return
-        
+
+    if not personal_access_token:
+
+        return
+                            
     REPO_MAPPING = {
 
         "software-updater"          : "software-updater",
@@ -268,17 +331,17 @@ def check_for_updates():
         
         try:
         
-            extract_to = os.path.join(BASE_DIRECTORY, package)
+            package_directory = os.path.join(root_directory, package)
 
-            if os.path.exists(extract_to):
+            if os.path.exists(package_directory):
                 
                 continue
             
-            os.makedirs(extract_to, exist_ok=True)
+            os.makedirs(package_directory, exist_ok=True)
 
-            if not create_env_files(extract_to):
+            if not create_env_files(package_directory, root_directory, personal_access_token):
 
-                break
+                continue
 
         except OSError as e:
             
@@ -289,6 +352,8 @@ def check_for_updates():
             global_error_handler("Directory Creation Error", f"Failed to create directory for {package}: {e}")
     
     updated_software_packages = []
+
+    BASE_DIRECTORY = os.getenv("BASE_DIRECTORY")
             
     try:
         
