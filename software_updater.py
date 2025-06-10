@@ -309,14 +309,6 @@ def check_for_updates():
 
     root_directory          = validate_base_directory()
     personal_access_token   = validate_personal_access_token()
-
-    if not root_directory:
-
-        return
-
-    if not personal_access_token:
-
-        return
                             
     REPO_MAPPING = {
 
