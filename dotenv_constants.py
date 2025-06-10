@@ -1,4 +1,4 @@
-from root import DIR_ROOT
+from init_constants import DIR_ROOT
 
 dotenv_constants = {
     "BASE_DIRECTORY":f"{DIR_ROOT}",

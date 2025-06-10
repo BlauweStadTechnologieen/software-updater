@@ -1,4 +1,4 @@
-from root import DIR_ROOT
+from init_constants import DIR_ROOT
 import os
 from error_handler import global_error_handler
 

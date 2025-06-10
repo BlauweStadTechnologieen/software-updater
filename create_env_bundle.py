@@ -1,7 +1,7 @@
 import os
 import subprocess
 from dotenv_constants import dotenv_constants
-from root import DIR_ROOT
+from init_constants import DIR_ROOT
 
 def run_command(cmd: str, cwd:str) -> None:
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
