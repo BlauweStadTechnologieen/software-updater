@@ -4,6 +4,7 @@ from error_handler import global_error_handler
 import send_message as message
 import zipfile
 import requests
+from requests.exceptions import HTTPError
 from get_extract_to_directory import get_extract_to_directory
 from install_new_dependencies import update_requirements
 from create_env_bundle import create_env_files
@@ -29,6 +30,12 @@ def get_latest_release_zip_url(repo:str) -> str:
         response.raise_for_status()
         release_data = response.json()
         return release_data["zipball_url"]
+
+    except requests.HTTPError as e:
+
+        global_error_handler("HTTP API Error",f"There was an error in retrieving the data from our servers - {e}")
+
+        return None
     
     except requests.RequestException as e:
         
@@ -97,10 +104,11 @@ def get_latest_tag(repo_name:str) -> dict:
         
         return latest_release_tag 
     
-    except requests.HTTPError as e:
+    except HTTPError as e:
 
         global_error_handler("GitHub API HTTP Error", f"HTTP error occurred while fetching tags for {repo_name}: {e}")
         
+        return None
         return None
     
     except requests.RequestException as e:
@@ -149,11 +157,11 @@ def install_updates(repo_name, target_dir) -> bool:
         global_error_handler("Request Exception Error", f"Failed to download and install the latest release of {repo_name}: {e}")
         
         return False
-    
-    except requests.exceptions.HTTPError as e:
+    except HTTPError as e:
         
         global_error_handler("HTTP Error", f"A HTTP error occurred while downloading {repo_name}: {e}")
         
+        return False
         return False
     
     except Exception as e:
@@ -203,7 +211,7 @@ def version_check(repo_name:str, cwd:str) -> bool:
 
             latest_release = release_data[0]["tag_name"]
 
-            print(stored_release, latest_release)
+            #print(stored_release, latest_release)
 
             if stored_release != latest_release:
 
