@@ -67,7 +67,7 @@ def get_latest_tag(repo_name:str) -> dict:
     
     print(f"Fetching latest tag for {repo_name}...")
 
-    url = f"https://api.github.com/repos/{github_owner}/{repo_name}/tags"
+    url = url = f"https://api.github.com/repos/{github_owner}/{repo_name}/releases/latest"
     
     headers = {'User-Agent': 'Updater/1.0'}
 
@@ -75,19 +75,33 @@ def get_latest_tag(repo_name:str) -> dict:
 
     if github_api_token:
     
-        headers["Authorisation"] = f"Bearer {os.getenv('GITHUB_TOKEN')}"
-    
-    response = requests.get(url, headers=headers)
-    
-    tags = response.json()
+        headers["Authorization"] = f"Bearer {github_api_token}"
 
-    try:
+    #print(headers)
     
-        if not tags:
-            
-            raise Exception(f"No tags found for {repo_name}, please ensure that you have created a tag for the latest release.")
+    try:
+
+        response = requests.get(url, headers=headers)
+
+        response.raise_for_status()
+
+        #print(f"GitHub API Status Code: {response.status_code}")
+        #print("Response JSON:", response.text)
+
+        get_latest_release_tag = response.json()
+        latest_release_tag = get_latest_release_tag.get("tag_name") 
         
-        return tags[0]['name'] 
+        if not latest_release_tag:
+            
+            raise ValueError(f"No tags found for {repo_name}, please ensure that you have created a tag for the latest release.")
+        
+        return latest_release_tag 
+    
+    except requests.HTTPError as e:
+
+        global_error_handler("GitHub API HTTP Error", f"HTTP error occurred while fetching tags for {repo_name}: {e}")
+        
+        return None
     
     except requests.RequestException as e:
         

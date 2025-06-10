@@ -184,7 +184,7 @@ def create_venv(cwd:str) -> str | None:
     Prints status messages for each subdirectory.
     """
             
-    print("Now we're creaing the Virtual Environment...")
+    print("First, we're creaing the Virtual Environment...")
     
     venv_path = os.path.join(cwd, ".venv")
 
@@ -210,8 +210,6 @@ def create_env_files(cwd:str) -> bool:
     dependencies from requirements.txt if present. Handles errors for missing base directory, missing subdirectories,
     and command failures, and prints status messages for each subdirectory.
     """
-
-    print("Lastly, we're validating the success of failure of all env files within the bundle...")
 
     try:
 
