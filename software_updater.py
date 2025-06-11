@@ -10,7 +10,6 @@ from create_env_bundle import create_env_files
 load_dotenv()
 
 github_owner    = os.getenv("GITHUB_USERNAME")    
-BASE_DIRECTORY  = os.getenv("BASE_DIRECTORY") 
 
 def get_latest_release_zip_url(repo:str) -> str:
     """
@@ -293,6 +292,43 @@ def validate_personal_access_token() -> str:
 
             global_error_handler("Invalid Personal Access Token",f"{e}")
 
+def github_owner_validation(personal_access_token:str) -> str:
+    
+    while True:
+
+        try:
+
+            organization_owner = input("Enter the name of owner of your GitHub....").strip()
+
+            if not organization_owner:
+
+                raise KeyError("No GitHub owner was specified")
+            
+            url = f"https://api.github.com/orgs/{organization_owner}"
+
+            headers = {
+                "Authorization": f"token {personal_access_token}",
+                "Accept": "application/vnd.github.v3+json"
+            }
+
+            response = requests.get(url, headers=headers)
+
+            response.raise_for_status()
+
+            org_data = response.json()
+
+            description = org_data.get("description", "No description provided.")
+
+            print(f"✅ Organization '{organization_owner}' found.")
+            print(f"📄 Description: {description}")
+
+            return organization_owner
+
+        except (HTTPError, KeyError) as e:
+
+            global_error_handler("Invalid Organization Owner")
+
+
 def check_for_updates():
     
     """
@@ -305,6 +341,7 @@ def check_for_updates():
 
     root_directory          = validate_base_directory()
     personal_access_token   = validate_personal_access_token()
+    organization_owner      = github_owner_validation(personal_access_token)
                             
     REPO_MAPPING = {
 
@@ -327,7 +364,7 @@ def check_for_updates():
             
             os.makedirs(package_directory, exist_ok=True)
 
-            if not create_env_files(package_directory, root_directory, personal_access_token):
+            if not create_env_files(package_directory, root_directory, personal_access_token, organization_owner):
 
                 return
 
@@ -359,7 +396,7 @@ def check_for_updates():
             
             if not install_updates(remote_git_repo, cwd):
                 
-                continue
+                break
             
             if not update_requirements(cwd):
 
