@@ -266,7 +266,7 @@ def validate_personal_access_token() -> str:
             global_error_handler("Invalid Personal Access Token",f"{e}")
 
 def github_owner_validation(personal_access_token: str) -> str:
-    import requests
+    
     from requests.exceptions import HTTPError
 
     try:
