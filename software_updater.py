@@ -9,8 +9,6 @@ from install_new_dependencies import update_requirements
 from create_env_bundle import create_env_files
 load_dotenv()
 
-github_owner    = os.getenv("GITHUB_USERNAME")    
-
 def get_latest_release_zip_url(repo:str) -> str:
     """
     Retrieves the latest release zip URL from the GitHub API.
@@ -19,6 +17,8 @@ def get_latest_release_zip_url(repo:str) -> str:
     Returns:
         str: The URL of the latest release zip file.
     """
+
+    github_owner = os.getenv("GITHUB_USERNAME") 
     
     api_url = f"https://api.github.com/repos/{github_owner}/{repo}/releases/latest"
 
@@ -72,6 +72,8 @@ def get_latest_tag(repo_name:str) -> dict:
     
     print(f"Fetching latest tag for {repo_name}...")
 
+    github_owner = os.getenv("GITHUB_USERNAME") 
+
     url = url = f"https://api.github.com/repos/{github_owner}/{repo_name}/releases/latest"
     
     headers = {'User-Agent': 'Updater/1.0'}
@@ -123,7 +125,10 @@ def get_latest_tag(repo_name:str) -> dict:
 def install_updates(repo_name, target_dir) -> bool:
     """
     Downloads and extracts the GitHub repo as a ZIP into the target_dir (flattened).
+    
     """
+
+    github_owner = os.getenv("GITHUB_USERNAME") 
     release_tag = get_latest_tag(repo_name)
     zip_url     = f"https://github.com/{github_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
     zip_path    = os.path.join(target_dir, "temp_repo.zip")
@@ -175,6 +180,8 @@ def version_check(repo_name:str, cwd:str) -> bool:
     Returns:
         bool: True if the latest version is installed, False otherwise.
     """
+
+    github_owner = os.getenv("GITHUB_USERNAME") 
     
     try:
     
