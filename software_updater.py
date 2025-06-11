@@ -266,9 +266,7 @@ def validate_base_directory() -> str:
 
             global_error_handler("Invalid base directory", str(e))
 
-            print("Please try again.\n")
-
-def validate_personal_access_token() -> str | None:
+def validate_personal_access_token() -> str:
 
     while True:
     
@@ -278,9 +276,9 @@ def validate_personal_access_token() -> str | None:
             
             if not personal_access_token:
 
-                raise KeyError("No Personal Access Token was speficied, this is a mandatory entry....")
+                raise KeyError("No Personal Access Token was entered, this is a mandatory entry....")
             
-            if len(personal_access_token) < 7:
+            if len(personal_access_token) < 40:
 
                 raise ValueError("Invalid Personal Access Token length")
             
@@ -294,8 +292,6 @@ def validate_personal_access_token() -> str | None:
         except (HTTPError, KeyError, ValueError) as e:
 
             global_error_handler("Invalid Personal Access Token",f"{e}")
-            
-            print("Please try and enter your access token again.")
 
 def check_for_updates():
     
