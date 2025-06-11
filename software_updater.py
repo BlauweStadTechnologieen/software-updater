@@ -164,7 +164,6 @@ def install_updates(repo_name, target_dir) -> bool:
         global_error_handler("HTTP Error", f"A HTTP error occurred while downloading {repo_name}: {e}")
         
         return False
-        return False
     
     except Exception as e:
         
