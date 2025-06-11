@@ -326,8 +326,7 @@ def github_owner_validation(personal_access_token:str) -> str:
 
         except (HTTPError, KeyError) as e:
 
-            global_error_handler("Invalid Organization Owner")
-
+            global_error_handler("Invalid Organization Owner", f"{e}")
 
 def check_for_updates():
     
