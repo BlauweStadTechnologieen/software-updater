@@ -86,7 +86,7 @@ def create_bat_file(cwd: str) -> str | None:
 
         return None
 
-def create_env(cwd: str, root_directory:str, personal_access_token:str) -> str | None:
+def create_env(cwd: str, root_directory:str, personal_access_token:str, organization_owner:str) -> str | None:
     """
     Creates a '.env' file in the specified current working directory (cwd).
     This file is typically used to store environment variables, not related to the Python virtual environment itself.
@@ -120,6 +120,8 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str) -> str |
             f.write(f"GITHUB_TOKEN='{personal_access_token}'\n")
 
             f.write(f"BASE_DIRECTORY='{root_directory}'\n")
+
+            f.write(f"GITHUB_USERNAME={organization_owner}\n")
             
             for key, value in dotenv_constants.items():
                 
@@ -163,7 +165,7 @@ def create_venv(cwd:str) -> str | None:
                             
     return create_venv.stdout
     
-def create_env_files(cwd:str, root_directory:str, personal_access_token:str) -> bool:
+def create_env_files(cwd:str, root_directory:str, personal_access_token:str, organization_owner:str) -> bool:
     
     """
     Scans all subdirectories in a specified base directory and creates a Python virtual environment (.venv)
@@ -174,7 +176,7 @@ def create_env_files(cwd:str, root_directory:str, personal_access_token:str) -> 
 
     try:
 
-        if not create_env(cwd, root_directory, personal_access_token):
+        if not create_env(cwd, root_directory, personal_access_token, organization_owner):
 
             return False
 
