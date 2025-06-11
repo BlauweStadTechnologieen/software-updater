@@ -313,10 +313,13 @@ def github_owner_validation(personal_access_token:str) -> str:
 
             response = requests.get(url, headers=headers)
 
+            if response.status_code == 404:
+                url = f"https://api.github.com/users/{organization_owner}"
+                response = requests.get(url, headers=headers)
+
             response.raise_for_status()
 
             org_data = response.json()
-
             description = org_data.get("description", "No description provided.")
 
             print(f"✅ Organization '{organization_owner}' found.")
@@ -324,9 +327,25 @@ def github_owner_validation(personal_access_token:str) -> str:
 
             return organization_owner
 
+        except HTTPError as e:
+            
+            status = e.response.status_code
+
+            if status == 401:
+
+                global_error_handler("Unauthorized Access", "Your Github token is ither invalid or has expired")
+
+            elif status == 404:
+
+                global_error_handler("Organization of User not found", "Either the User of the Organization has not been found. Please check the spelling of the User or Organisation and try again. (This is case-sentitive)")
+
+            else:
+                
+                global_error_handler("HTTP Error",str(e))
+        
         except (HTTPError, KeyError) as e:
 
-            global_error_handler("Invalid Organization Owner", f"{e}")
+            global_error_handler("Invalid Organization Owner", f"{e}. Please re-enter the the Owner's name.")
 
 def check_for_updates():
     
