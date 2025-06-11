@@ -365,18 +365,10 @@ def check_for_updates():
                 
                 continue
             
-            venv_dir = os.path.join(cwd, ".venv")
+            if not update_requirements(cwd):
 
-            if os.path.isdir(venv_dir):
-            
-                if not update_requirements(cwd):
-
-                    break
-                
-            else:
-
-                print(f"Virtual environment not found for {software_package}. Skipping the installation of dependancies. You will need to create a .venv and install the requirements manually.")
-            
+                break
+                        
             updated_software_packages.append(software_package)
         
         if updated_software_packages:
