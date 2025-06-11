@@ -100,7 +100,7 @@ def install_updates(repo_name:str, target_dir:str, organization_owner:str) -> bo
     zip_url     = f"https://github.com/{organization_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
     zip_path    = os.path.join(target_dir, "temp_repo.zip")
 
-    if not version_check(repo_name, target_dir):
+    if not version_check(repo_name, target_dir, organization_owner):
         
         return False
     
@@ -265,25 +265,43 @@ def validate_personal_access_token() -> str:
 
             global_error_handler("Invalid Personal Access Token",f"{e}")
 
-def github_owner_validation(personal_access_token:str) -> str:
-    
+def github_owner_validation(personal_access_token: str) -> str:
+    import requests
+    from requests.exceptions import HTTPError
+
+    try:
+        # First, get the authenticated user
+        auth_response = requests.get(
+
+            "https://api.github.com/user",
+
+            headers={
+
+                "Authorization": f"token {personal_access_token}",
+                "Accept": "application/vnd.github.v3+json"
+
+            }
+        )
+        auth_response.raise_for_status()
+        
+        authenticated_user = auth_response.json()["login"]
+
+    except HTTPError as e:
+        raise RuntimeError("Failed to authenticate with the provided GitHub token") from e
+
     while True:
-
         try:
-
-            organization_owner = input("Enter the name of owner of your GitHub....").strip()
+            organization_owner = input("Enter the GitHub owner (username or org): ").strip()
 
             if not organization_owner:
-
                 raise KeyError("No GitHub owner was specified")
-            
-            url = f"https://api.github.com/orgs/{organization_owner}"
 
+            # Check existence of org first, then fallback to user
+            url = f"https://api.github.com/orgs/{organization_owner}"
             headers = {
                 "Authorization": f"token {personal_access_token}",
                 "Accept": "application/vnd.github.v3+json"
             }
-
             response = requests.get(url, headers=headers)
 
             if response.status_code == 404:
@@ -292,33 +310,27 @@ def github_owner_validation(personal_access_token:str) -> str:
 
             response.raise_for_status()
 
-            org_data = response.json()
-            description = org_data.get("description", "No description provided.")
+            if organization_owner != authenticated_user:
+                raise PermissionError(f"The GitHub owner '{organization_owner}' does not match the authenticated user '{authenticated_user}'.")
 
-            print(f"✅ Organization '{organization_owner}' found.")
-            print(f"📄 Description: {description}")
-
+            print(f"Owner '{organization_owner}' validated and matches the authenticated user.")
             return organization_owner
 
+        except PermissionError as e:
+            print(f"Permission Error: {e}")
+
         except HTTPError as e:
-            
             status = e.response.status_code
-
             if status == 401:
-
-                global_error_handler("Unauthorized Access", "Your Github token is ither invalid or has expired")
-
+                print("Unauthorized: Token is invalid or expired.")
             elif status == 404:
-
-                global_error_handler("Organization of User not found", "Either the User of the Organization has not been found. Please check the spelling of the User or Organisation and try again. (This is case-sentitive)")
-
+                print("Not Found: No such GitHub user/org.")
             else:
-                
-                global_error_handler("HTTP Error",str(e))
-        
-        except (HTTPError, KeyError) as e:
+                print(f"HTTP Error: {e}")
 
-            global_error_handler("Invalid Organization Owner", f"{e}. Please re-enter the the Owner's name.")
+        except KeyError as e:
+            print(f"input Error: {e}")
+
 
 def check_for_updates():
     
