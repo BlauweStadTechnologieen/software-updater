@@ -333,7 +333,7 @@ def check_for_updates():
 
             if not create_env_files(package_directory, root_directory, personal_access_token):
 
-                continue
+                return
 
         except OSError as e:
             
@@ -345,7 +345,7 @@ def check_for_updates():
     
     updated_software_packages = []
 
-    BASE_DIRECTORY = os.getenv("BASE_DIRECTORY")
+    BASE_DIRECTORY = root_directory
             
     try:
         
@@ -353,7 +353,7 @@ def check_for_updates():
             
             cwd = os.path.join(BASE_DIRECTORY, software_package)
             
-            if software_package not in REPO_MAPPING:
+            if software_package not in REPO_MAPPING.keys():
 
                 print(f"Skipping {software_package} as it is not in the mapping.")
                 
@@ -381,7 +381,7 @@ def check_for_updates():
         
         if updated_software_packages:
 
-            print("Updated Packages")
+            print("Updated Packages present....")
                         
             message.send_message(updated_software_packages)
 
