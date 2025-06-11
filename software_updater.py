@@ -392,6 +392,10 @@ def check_for_updates():
             if not create_env_files(package_directory, root_directory, personal_access_token, organization_owner):
 
                 return
+            
+            if not update_requirements(package_directory):
+
+                return
 
         except OSError as e:
             
@@ -422,11 +426,7 @@ def check_for_updates():
             if not install_updates(remote_git_repo, cwd):
                 
                 break
-            
-            if not update_requirements(cwd):
-
-                break
-                        
+                                    
             updated_software_packages.append(software_package)
         
         if updated_software_packages:
