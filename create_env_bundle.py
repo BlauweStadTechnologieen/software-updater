@@ -1,6 +1,7 @@
 import os
 import subprocess
 from dotenv_constants import dotenv_constants
+from error_handler import global_error_handler
 
 def run_command(cmd: str, cwd:str) -> None:
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
@@ -138,6 +139,31 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
         print(custom_message)
 
         return None
+    
+def create_requirements_file(cwd:str) -> str | None:
+
+    dependancies_path =  os.path.join(cwd, "requirements.txt")
+
+    try:
+    
+        if os.path.exists(dependancies_path):
+
+            return dependancies_path
+        
+        with open(dependancies_path, "w") as f:
+            
+            f.write("python-dotenv\n")
+            f.write("requests\n")
+            f.write("azure-mgmt-compute\n")
+            f.write("azure-identity\n")
+
+        return dependancies_path
+    
+    except Exception as e:
+
+        global_error_handler("Unexpected Error with creating a dependancy file", f"{e}")
+
+        return None
 
 def create_venv(cwd:str) -> str | None:
     """
@@ -189,6 +215,10 @@ def create_env_files(cwd:str, root_directory:str, personal_access_token:str, org
                 print(f"{fn.__name__} failed.")
                 
                 return False
+            
+        if not create_requirements_file(cwd):
+
+            return False
                
         print("All files created successfully.")
 
