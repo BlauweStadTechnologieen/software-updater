@@ -121,7 +121,7 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
 
             f.write(f"BASE_DIRECTORY='{root_directory}'\n")
 
-            f.write(f"GITHUB_USERNAME={organization_owner}\n")
+            f.write(f"GITHUB_USERNAME='{organization_owner}'\n")
             
             for key, value in dotenv_constants.items():
                 
