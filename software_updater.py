@@ -9,38 +9,6 @@ from install_new_dependencies import update_requirements
 from create_env_bundle import create_env_files
 load_dotenv()
 
-def get_latest_release_zip_url(repo:str) -> str:
-    """
-    Retrieves the latest release zip URL from the GitHub API.
-    Args:
-        repo(str): Denotes the name of the repository.
-    Returns:
-        str: The URL of the latest release zip file.
-    """
-
-    github_owner = os.getenv("GITHUB_USERNAME") 
-    
-    api_url = f"https://api.github.com/repos/{github_owner}/{repo}/releases/latest"
-
-    try:
-        
-        response = requests.get(api_url)
-        response.raise_for_status()
-        release_data = response.json()
-        return release_data["zipball_url"]
-
-    except requests.HTTPError as e:
-
-        global_error_handler("HTTP API Error",f"There was an error in retrieving the data from our servers - {e}")
-
-        return None
-    
-    except requests.RequestException as e:
-        
-        global_error_handler("Latest ZIP URL retrieval error", f"Failed to fetch the latest release ZIP URL for: {e}")
-        
-        return None
-
 def extract_zip_flat(zip_path:str, target_dir:str):
     
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
@@ -68,13 +36,13 @@ def extract_zip_flat(zip_path:str, target_dir:str):
                 
                 target.write(source.read())
 
-def get_latest_tag(repo_name:str) -> dict:
+def get_latest_tag(repo_name:str, organization_name:str) -> dict:
     
     print(f"Fetching latest tag for {repo_name}...")
 
     github_owner = os.getenv("GITHUB_USERNAME") 
 
-    url = url = f"https://api.github.com/repos/{github_owner}/{repo_name}/releases/latest"
+    url = f"https://api.github.com/repos/{organization_name}/{repo_name}/releases/latest"
     
     headers = {'User-Agent': 'Updater/1.0'}
 
@@ -122,15 +90,14 @@ def get_latest_tag(repo_name:str) -> dict:
         
         return None
 
-def install_updates(repo_name, target_dir) -> bool:
+def install_updates(repo_name:str, target_dir:str, organization_owner:str) -> bool:
     """
     Downloads and extracts the GitHub repo as a ZIP into the target_dir (flattened).
     
     """
 
-    github_owner = os.getenv("GITHUB_USERNAME") 
-    release_tag = get_latest_tag(repo_name)
-    zip_url     = f"https://github.com/{github_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
+    release_tag = get_latest_tag(repo_name, organization_owner)
+    zip_url     = f"https://github.com/{organization_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
     zip_path    = os.path.join(target_dir, "temp_repo.zip")
 
     if not version_check(repo_name, target_dir):
@@ -171,7 +138,7 @@ def install_updates(repo_name, target_dir) -> bool:
         
         return False
     
-def version_check(repo_name:str, cwd:str) -> bool:
+def version_check(repo_name:str, cwd:str, organization_owner:str) -> bool:
     """
     Checks if the latest version of the repository is already installed.
     Args:
@@ -184,7 +151,7 @@ def version_check(repo_name:str, cwd:str) -> bool:
     
     try:
     
-        api_url = f"https://api.github.com/repos/{github_owner}/{repo_name}/releases"
+        api_url = f"https://api.github.com/repos/{organization_owner}/{repo_name}/releases"
 
         release_file = "current_release.txt"
 
@@ -422,7 +389,7 @@ def check_for_updates():
 
             remote_git_repo = REPO_MAPPING[software_package]
             
-            if not install_updates(remote_git_repo, cwd):
+            if not install_updates(remote_git_repo, cwd, organization_owner):
                 
                 break
                                     
