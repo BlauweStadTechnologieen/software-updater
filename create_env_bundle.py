@@ -87,7 +87,7 @@ def create_bat_file(cwd: str) -> str | None:
 
         return None
 
-def create_env(cwd: str, root_directory:str, personal_access_token:str, organization_owner:str) -> str | None:
+def create_env(cwd: str, root_directory:str, personal_access_token:str, organization_owner:str, mql5_root_directory:str) -> str | None:
     """
     Creates a '.env' file in the specified current working directory (cwd).
     This file is typically used to store environment variables, not related to the Python virtual environment itself.
@@ -123,7 +123,9 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
             f.write(f"BASE_DIRECTORY='{root_directory}'\n")
 
             f.write(f"GITHUB_USERNAME='{organization_owner}'\n")
-            
+
+            f.write(f"PARENT_DIRECTORY='{mql5_root_directory}'\n")
+
             for key, value in dotenv_constants.items():
                 
                 f.write(f"{key}='{value}'\n")
