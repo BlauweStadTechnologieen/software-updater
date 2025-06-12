@@ -198,7 +198,7 @@ def create_venv(cwd:str) -> str | None:
                             
     return create_venv.stdout
     
-def create_env_files(cwd:str, root_directory:str, personal_access_token:str, organization_owner:str) -> bool:
+def create_env_files(cwd:str, root_directory:str, personal_access_token:str, organization_owner:str, mql5_root_directory:str) -> bool:
     
     """
     Scans all subdirectories in a specified base directory and creates a Python virtual environment (.venv)
@@ -209,7 +209,7 @@ def create_env_files(cwd:str, root_directory:str, personal_access_token:str, org
 
     try:
 
-        if not create_env(cwd, root_directory, personal_access_token, organization_owner):
+        if not create_env(cwd, root_directory, personal_access_token, organization_owner, mql5_root_directory):
 
             return False
 
