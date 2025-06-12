@@ -67,6 +67,24 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
     pip_executable      = os.path.join(cwd, ".venv", "Scripts", "pip.exe")
     requirements_path   = os.path.join(cwd, dependancy_filename)
 
+    try:
+
+        subprocess.run([cwd,"-m","pip","install","--upgrade","pip"], check=True, capture_output=True, text=True)
+
+        print("PIP Successfully Upgraded")
+
+    except subprocess.CalledProcessError as e:
+
+        error_handler("PIP Upgrade Failed",f"subprocess.CalledProcessError:\nReturn code: {e.returncode}\nOutput: {e.output}\nError: {e.stderr}")
+
+    except FileNotFoundError as e:
+
+        error_handler("Python or pip not found",f"FileNotFoundError:\n{e}")
+
+    except Exception as e:
+
+        error_handler("Unexpected Error During PIP Upgrade",f"{type(e).__name__}: {e}")
+
     if not os.path.exists(pip_executable) or not os.path.exists(requirements_path):
         
         custom_message = "Virtual environment or requirements.txt not found."
