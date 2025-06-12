@@ -207,7 +207,7 @@ def version_check(repo_name:str, cwd:str, organization_owner:str) -> bool:
     
 import os
 
-def validate_base_directory() -> str:
+def validate_base_directory() -> str | None:
     
     while True:
 
@@ -230,7 +230,7 @@ def validate_base_directory() -> str:
 
             global_error_handler("Invalid base directory", str(e))
 
-def validate_personal_access_token() -> str:
+def validate_personal_access_token() -> str | None:
 
     while True:
     
@@ -257,7 +257,7 @@ def validate_personal_access_token() -> str:
 
             global_error_handler("Invalid Personal Access Token",f"{e}")
 
-def github_owner_validation(personal_access_token: str) -> str:
+def github_owner_validation(personal_access_token: str) -> str | None:
     
     from requests.exceptions import HTTPError
 
@@ -294,10 +294,14 @@ def github_owner_validation(personal_access_token: str) -> str:
 
             # Check existence of org first, then fallback to user
             url = f"https://api.github.com/orgs/{organization_owner}"
+
             headers = {
+
                 "Authorization": f"token {personal_access_token}",
                 "Accept": "application/vnd.github.v3+json"
+
             }
+            
             response = requests.get(url, headers=headers)
 
             if response.status_code == 404:
@@ -340,6 +344,29 @@ def github_owner_validation(personal_access_token: str) -> str:
 
             print(f"input Error: {e}")
 
+def validate_mql5_directory() -> str | None:
+
+    while True:
+    
+        try:
+
+            mql5_root_directory = input("Please enter your MQL5 base directory: ").strip()
+
+            if not mql5_root_directory:
+                raise ValueError("No directory path was provided.")
+            
+            if not os.path.exists(mql5_root_directory):
+                raise FileNotFoundError(f"The path '{mql5_root_directory}' does not exist.")
+            
+            if not os.path.isdir(mql5_root_directory):
+                raise NotADirectoryError(f"The path '{mql5_root_directory}' is not a directory.")
+            
+            return mql5_root_directory
+
+        except (ValueError, FileNotFoundError, NotADirectoryError) as e:
+
+            global_error_handler("Invalid base directory", str(e))
+
 def check_for_updates():
     
     """
@@ -353,6 +380,7 @@ def check_for_updates():
     root_directory          = validate_base_directory()
     personal_access_token   = validate_personal_access_token()
     organization_owner      = github_owner_validation(personal_access_token)
+    mql5_root_directory     = validate_mql5_directory()
                             
     REPO_MAPPING = {
 
@@ -375,7 +403,7 @@ def check_for_updates():
             
             os.makedirs(package_directory, exist_ok=True)
 
-            if not create_env_files(package_directory, root_directory, personal_access_token, organization_owner):
+            if not create_env_files(package_directory, root_directory, personal_access_token, organization_owner, mql5_root_directory):
 
                 return
             
@@ -411,7 +439,7 @@ def check_for_updates():
             
             if not install_updates(remote_git_repo, cwd, organization_owner):
                 
-                break
+                continue
                                     
             updated_software_packages.append(software_package)
         
