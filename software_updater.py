@@ -35,7 +35,7 @@ def extract_zip_flat(zip_path:str, target_dir:str):
                 
                 target.write(source.read())
 
-def get_latest_tag(repo_name:str, organization_name:str) -> dict:
+def get_latest_tag(repo_name:str, organization_name:str, organization_token:str) -> dict:
     
     print(f"Fetching latest tag for {repo_name}...")
 
@@ -44,6 +44,12 @@ def get_latest_tag(repo_name:str, organization_name:str) -> dict:
         url = f"https://api.github.com/repos/{organization_name}/{repo_name}/releases/latest"
     
         headers = {'User-Agent': 'Updater/1.0'}
+
+        if organization_token:
+
+            headers[f"Authorization : token {organization_token}"]
+
+        print(headers)
 
         response = requests.get(url, headers=headers)
 
@@ -77,13 +83,13 @@ def get_latest_tag(repo_name:str, organization_name:str) -> dict:
         
         return None
 
-def install_updates(repo_name:str, target_dir:str, organization_owner:str) -> bool:
+def install_updates(repo_name:str, target_dir:str, organization_owner:str, organization_token:str) -> bool:
     """
     Downloads and extracts the GitHub repo as a ZIP into the target_dir (flattened).
     
     """
 
-    release_tag = get_latest_tag(repo_name, organization_owner)
+    release_tag = get_latest_tag(repo_name, organization_owner, organization_token)
     zip_url     = f"https://github.com/{organization_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
     zip_path    = os.path.join(target_dir, "temp_repo.zip")
 
@@ -430,7 +436,7 @@ def check_for_updates():
 
             remote_git_repo = REPO_MAPPING[software_package]
             
-            if not install_updates(remote_git_repo, cwd, organization_owner):
+            if not install_updates(remote_git_repo, cwd, organization_owner, personal_access_token):
                 
                 continue
                                     
