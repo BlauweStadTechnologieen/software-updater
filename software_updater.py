@@ -365,7 +365,7 @@ def validate_mql5_directory() -> str | None:
 
         except (ValueError, FileNotFoundError, NotADirectoryError) as e:
 
-            global_error_handler("Invalid base directory", str(e))
+            global_error_handler("Invalid MQL5 directory", str(e))
 
 def check_for_updates():
     
