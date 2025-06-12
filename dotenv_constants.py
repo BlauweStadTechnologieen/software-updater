@@ -11,4 +11,5 @@ dotenv_constants = {
     "SENDER_EMAIL":"<SENDER_EMAIL>",
     "SENDER_DEPARTMENT":"Engineering",
     "VERSION_FOLDER":"MQL5",
+    "PACKAGE_NAME":"<PACKAGE_NAME>"
 }
