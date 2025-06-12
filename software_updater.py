@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 from error_handler import global_error_handler
 import send_message as message
 import zipfile
@@ -7,7 +6,7 @@ import requests
 from requests.exceptions import HTTPError
 from install_new_dependencies import update_requirements
 from create_env_bundle import create_env_files
-load_dotenv()
+
 
 def extract_zip_flat(zip_path:str, target_dir:str):
     
@@ -40,17 +39,11 @@ def get_latest_tag(repo_name:str, organization_name:str) -> dict:
     
     print(f"Fetching latest tag for {repo_name}...")
 
-    url = f"https://api.github.com/repos/{organization_name}/{repo_name}/releases/latest"
-    
-    headers = {'User-Agent': 'Updater/1.0'}
-
-    github_api_token = os.getenv("GITHUB_TOKEN")
-
-    if github_api_token:
-    
-        headers["Authorization"] = f"Bearer {github_api_token}"
-    
     try:
+
+        url = f"https://api.github.com/repos/{organization_name}/{repo_name}/releases/latest"
+    
+        headers = {'User-Agent': 'Updater/1.0'}
 
         response = requests.get(url, headers=headers)
 
