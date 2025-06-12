@@ -40,8 +40,6 @@ def get_latest_tag(repo_name:str, organization_name:str) -> dict:
     
     print(f"Fetching latest tag for {repo_name}...")
 
-    github_owner = os.getenv("GITHUB_USERNAME") 
-
     url = f"https://api.github.com/repos/{organization_name}/{repo_name}/releases/latest"
     
     headers = {'User-Agent': 'Updater/1.0'}
@@ -51,8 +49,6 @@ def get_latest_tag(repo_name:str, organization_name:str) -> dict:
     if github_api_token:
     
         headers["Authorization"] = f"Bearer {github_api_token}"
-
-    #print(headers)
     
     try:
 
@@ -60,10 +56,8 @@ def get_latest_tag(repo_name:str, organization_name:str) -> dict:
 
         response.raise_for_status()
 
-        #print(f"GitHub API Status Code: {response.status_code}")
-        #print("Response JSON:", response.text)
-
         get_latest_release_tag = response.json()
+
         latest_release_tag = get_latest_release_tag.get("tag_name") 
         
         if not latest_release_tag:
@@ -126,6 +120,7 @@ def install_updates(repo_name:str, target_dir:str, organization_owner:str) -> bo
         global_error_handler("Request Exception Error", f"Failed to download and install the latest release of {repo_name}: {e}")
         
         return False
+    
     except HTTPError as e:
         
         global_error_handler("HTTP Error", f"A HTTP error occurred while downloading {repo_name}: {e}")
@@ -145,10 +140,7 @@ def version_check(repo_name:str, cwd:str, organization_owner:str) -> bool:
         repo_name (str): The name of the repository to check.
     Returns:
         bool: True if the latest version is installed, False otherwise.
-    """
-
-    github_owner = os.getenv("GITHUB_USERNAME") 
-    
+    """    
     try:
     
         api_url = f"https://api.github.com/repos/{organization_owner}/{repo_name}/releases"
@@ -282,15 +274,19 @@ def github_owner_validation(personal_access_token: str) -> str:
 
             }
         )
+
         auth_response.raise_for_status()
         
         authenticated_user = auth_response.json()["login"]
 
     except HTTPError as e:
+
         raise RuntimeError("Failed to authenticate with the provided GitHub token") from e
 
     while True:
+        
         try:
+
             organization_owner = input("Enter the GitHub owner (username or org): ").strip()
 
             if not organization_owner:
@@ -305,32 +301,44 @@ def github_owner_validation(personal_access_token: str) -> str:
             response = requests.get(url, headers=headers)
 
             if response.status_code == 404:
+
                 url = f"https://api.github.com/users/{organization_owner}"
+
                 response = requests.get(url, headers=headers)
 
             response.raise_for_status()
 
             if organization_owner != authenticated_user:
+
                 raise PermissionError(f"The GitHub owner '{organization_owner}' does not match the authenticated user '{authenticated_user}'.")
 
             print(f"Owner '{organization_owner}' validated and matches the authenticated user.")
+            
             return organization_owner
 
         except PermissionError as e:
+
             print(f"Permission Error: {e}")
 
         except HTTPError as e:
+
             status = e.response.status_code
+
             if status == 401:
+
                 print("Unauthorized: Token is invalid or expired.")
+
             elif status == 404:
+
                 print("Not Found: No such GitHub user/org.")
+
             else:
+
                 print(f"HTTP Error: {e}")
 
         except KeyError as e:
-            print(f"input Error: {e}")
 
+            print(f"input Error: {e}")
 
 def check_for_updates():
     
