@@ -1,6 +1,6 @@
 import os
 from error_handler import global_error_handler
-import send_message as message
+from send_message import send_message
 import zipfile
 import requests
 from requests.exceptions import HTTPError
@@ -412,7 +412,7 @@ def check_for_updates():
 
         except OSError as e:
             
-            global_error_handler("Directory Creation Error", f"Failed to create directory for {package}: {e}")
+            global_error_handler("Directory Creation OS Error", f"Failed to create directory for {package}: {e}")
             
         except Exception as e:
 
@@ -446,7 +446,7 @@ def check_for_updates():
 
             print("Updated Packages present....")
                         
-            message.send_message(updated_software_packages)
+            send_message(updated_software_packages)
 
     except OSError as e:
 
