@@ -43,13 +43,12 @@ def get_latest_tag(repo_name:str, organization_name:str, organization_token:str)
 
         url = f"https://api.github.com/repos/{organization_name}/{repo_name}/releases/latest"
     
-        headers = {'User-Agent': 'Updater/1.0'}
+        headers = {
 
-        if organization_token:
+            'User-Agent': 'Updater/1.0',
+            'Authorization': f'token {organization_token}'
 
-            headers[f"Authorization : token {organization_token}"]
-
-        print(headers)
+        }
 
         response = requests.get(url, headers=headers)
 
