@@ -118,21 +118,26 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
 
             print(f"Creating keys & values in {env_file}...")
             
-            f.write(f"GITHUB_TOKEN='{personal_access_token}'\n")
+            dynamic_constants = [
 
-            f.write(f"BASE_DIRECTORY='{root_directory}'\n")
+                f"GITHUB_TOKEN={personal_access_token}",
+                f"BASE_DIRECTORY={root_directory}",
+                f"GITHUB_USERNAME={organization_owner}",
+                f"PARENT_DIRECTORY={mql5_root_directory}",
 
-            f.write(f"GITHUB_USERNAME='{organization_owner}'\n")
+            ]
 
-            f.write(f"PARENT_DIRECTORY='{mql5_root_directory}'\n")
+            for value in dynamic_constants:
+
+                f.write(value + "\n")
 
             for key, value in dotenv_constants.items():
                 
                 f.write(f"{key}='{value}'\n")
 
-        print(f".env file created in {cwd}")
+            print(f".env file created in {cwd}")
 
-        return env_file
+            return env_file
 
     except Exception as e:
 
