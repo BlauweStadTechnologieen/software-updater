@@ -65,13 +65,14 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
     """
     
     pip_executable      = os.path.join(cwd, ".venv", "Scripts", "pip.exe")
+    python_executable   = os.path.join(cwd, ".venv", "Scripts", "python.exe") 
     requirements_path   = os.path.join(cwd, dependancy_filename)
 
     try:
 
-        subprocess.run([cwd,"-m","pip","install","--upgrade","pip"], check=True, capture_output=True, text=True)
+        subprocess.run([python_executable, "-m", "pip", "install", "--upgrade", "pip"], check=True, capture_output=True, text=True)
 
-        print("PIP Successfully Upgraded")
+        print("Pip version successfully upgraded!")
 
     except subprocess.CalledProcessError as e:
 
