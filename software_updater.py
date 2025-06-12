@@ -45,8 +45,8 @@ def get_latest_tag(repo_name:str, organization_name:str, organization_token:str)
     
         headers = {
 
-            'User-Agent': 'Updater/1.0',
-            'Authorization': f'token {organization_token}'
+            "User-Agent": "Updater/1.0",
+            "Authorization": f"token {organization_token}",
 
         }
 
