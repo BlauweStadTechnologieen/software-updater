@@ -171,8 +171,6 @@ def version_check(repo_name:str, cwd:str, organization_owner:str) -> bool:
 
             latest_release = release_data[0]["tag_name"]
 
-            #print(stored_release, latest_release)
-
             if stored_release != latest_release:
 
                 with open(release_file_dir, "w") as f:
