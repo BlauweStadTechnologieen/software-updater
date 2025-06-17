@@ -213,7 +213,7 @@ def create_env_files(cwd:str, root_directory:str, personal_access_token:str, org
 
             return False
 
-        for fn in (create_venv, create_bat_file, create_gitignore):
+        for fn in (create_venv, create_bat_file):
             
             result = fn(cwd)
 
