@@ -6,45 +6,6 @@ from error_handler import global_error_handler
 def run_command(cmd: str, cwd:str) -> None:
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
 
-def create_gitignore(cwd: str) -> str | None:
-    """
-    Creates a '.gitignore' file in the specified current working directory (cwd).
-    This file is used to specify files and directories that should be ignored by Git.
-    Args:
-        cwd (str): The current working directory where the '.gitignore' file should be created.
-    Returns:
-        None
-    Notes:
-        - If the '.gitignore' file already exists, the function returns without making changes.
-        - If an exception occurs during file creation, it prints a custom error message.
-    """
-    
-    gitignore_file = os.path.join(cwd, ".gitignore")
-
-    print("Now we are creating the .gitignore file...")
-
-    if os.path.exists(gitignore_file):
-        
-        print(f".gitignore file already exists in {cwd}")
-        
-        return gitignore_file
-
-    try:
-        
-        with open(gitignore_file, "w") as f:
-            
-            f.write(".venv/\n__pycache__/\n*.pyc\n*.pyo\n*.pyd\n.env\n/run.BAT\n.vscode/\n.idea/\n*.swp\n*.swo\n*.bak\n*.tmp\n*.log\n")
-        
-        return gitignore_file
-
-    except Exception as e:
-
-        custom_message = f"{e.__class__.__name__} {e}"
-
-        print(custom_message)
-
-        return None
-
 def create_bat_file(cwd: str) -> str | None:
     """
     Creates a 'run.bat' file in the specified current working directory (cwd).
