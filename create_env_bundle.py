@@ -122,8 +122,6 @@ def create_requirements_file(cwd:str) -> str | None:
             
             f.write("python-dotenv\n")
             f.write("requests\n")
-            f.write("azure-mgmt-compute\n")
-            f.write("azure-identity\n")
 
         return dependancies_path
     
