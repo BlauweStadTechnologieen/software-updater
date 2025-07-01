@@ -228,11 +228,13 @@ def validate_base_directory() -> str | None:
 
 def validate_personal_access_token() -> str | None:
 
+    import getpass
+    
     while True:
     
         try:
         
-            personal_access_token = input("Please enter your Gethub Personal Access Token (PAT).....").strip()
+            personal_access_token = getpass.getpass("Please enter your Gethub Personal Access Token (PAT).....").strip()
             
             if not personal_access_token:
 
@@ -383,7 +385,8 @@ def check_for_updates():
         "software-updater"          : "software-updater",
         "git-commit"                : "github-push-script",
         "vm-status-monitor"         : "azure-vm-monitor",
-        "create-virtual-environment": "create-virtual-environment",
+        "dotenv"                    : "envconstants",
+
     }
 
     
