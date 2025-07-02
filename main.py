@@ -259,19 +259,18 @@ def github_owner_validation(personal_access_token: str) -> str | None:
     
     from requests.exceptions import HTTPError
 
+    headers={
+
+        "Authorization": f"token {personal_access_token}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+        
     try:
+        
         # First, get the authenticated user
-        auth_response = requests.get(
 
-            "https://api.github.com/user",
-
-            headers={
-
-                "Authorization": f"token {personal_access_token}",
-                "Accept": "application/vnd.github.v3+json"
-
-            }
-        )
+        github_api_user = "https://api.github.com/user"
+        auth_response   = requests.get(github_api_user, headers=headers)
 
         auth_response.raise_for_status()
         
@@ -291,22 +290,15 @@ def github_owner_validation(personal_access_token: str) -> str | None:
                 raise KeyError("No GitHub owner was specified")
 
             # Check existence of org first, then fallback to user
-            url = f"https://api.github.com/orgs/{organization_owner}"
-
-            headers = {
-
-                "Authorization": f"token {personal_access_token}",
-                "Accept": "application/vnd.github.v3+json"
-
-            }
+            github_api_orgs = f"https://api.github.com/orgs/{organization_owner}"
             
-            response = requests.get(url, headers=headers)
+            response = requests.get(github_api_orgs, headers=headers)
 
             if response.status_code == 404:
 
-                url = f"https://api.github.com/users/{organization_owner}"
+                github_api_users = f"https://api.github.com/users/{organization_owner}"
 
-                response = requests.get(url, headers=headers)
+                response = requests.get(github_api_users, headers=headers)
 
             response.raise_for_status()
 
@@ -378,7 +370,8 @@ def check_for_updates():
     root_directory          = validate_base_directory()
     personal_access_token   = validate_personal_access_token()
     organization_owner      = github_owner_validation(personal_access_token)
-    mql5_root_directory     = validate_mql5_directory()
+    #mql5_root_directory     = validate_mql5_directory()
+    mql5_root_directory     = "path/to/mql5/directory"  # Placeholder for MQL5 directory, replace with actual path or validation
                             
     REPO_MAPPING = {
 
@@ -388,7 +381,6 @@ def check_for_updates():
 
     }
 
-    
     for package in REPO_MAPPING.keys():
         
         try:
