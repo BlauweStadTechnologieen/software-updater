@@ -35,7 +35,7 @@ def create_bat_file(cwd: str) -> str | None:
             
             f.write("@echo off\n")
             f.write(f'call "{cwd}\\.venv\\Scripts\\activate.bat"\n')
-            f.write(f'python "{cwd}\\<file_to_run>.py"\n')  
+            f.write(f'python "{cwd}\\main.py"\n')  
             f.write("deactivate\n")
         
         return bat_file
@@ -119,7 +119,8 @@ def create_requirements_file(cwd:str) -> str | None:
             return dependancies_path
         
         with open(dependancies_path, "w") as f:
-            
+
+            f.write(f"#If you need to manually install the dependencies, please refer to the following instructions:\n#1 Navigate to {cwd}\n#2 Activate .venv\n#3 Run the following command: pip install -r requirements.txt\n#Contact Support: hello@bluecitycapital.com\n")
             f.write("python-dotenv\n")
             f.write("requests\n")
 
