@@ -370,13 +370,12 @@ def check_for_updates():
     root_directory          = validate_base_directory()
     personal_access_token   = validate_personal_access_token()
     organization_owner      = github_owner_validation(personal_access_token)
-    #mql5_root_directory     = validate_mql5_directory()
-    mql5_root_directory     = "path/to/mql5/directory"  # Placeholder for MQL5 directory, replace with actual path or validation
+    mql5_root_directory     = validate_mql5_directory()
                             
     REPO_MAPPING = {
 
         "software-updater"          : "software-updater",
-        "git-commit"                : "github-push-script",
+        "mql5-script-manager"       : "github-push-script",
         "vm-status-monitor"         : "azure-vm-monitor",
 
     }
