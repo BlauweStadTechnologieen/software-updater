@@ -67,9 +67,7 @@ def install_dependencies() -> bool:
     """
 
     try:
-    
-        cwd = os.getcwd()
-        
+            
         packages = dependancies_list()
 
         for import_name, pip_name in packages.items():
@@ -80,7 +78,7 @@ def install_dependencies() -> bool:
                 
                 continue
                
-            run_result = run_command(["pip", "install", pip_name], cwd)
+            run_result = run_command(["pip", "install", pip_name])
             
             if run_result.returncode != 0:
 
@@ -91,7 +89,7 @@ def install_dependencies() -> bool:
 
                 return False
             
-            print(f"{pip_name} has been successfully installed in {cwd}")
+            print(f"{pip_name} has been successfully installed.")
 
         print("All initial packages have been successfully installed. If there is a missing package, contact your administrator.")
         
@@ -120,8 +118,6 @@ def uninstall_dependencies() -> bool:
 
     try:
 
-        cwd = os.getcwd()
-
         packages = dependancies_list()
 
         for import_name, pip_name in packages.items():
@@ -130,7 +126,7 @@ def uninstall_dependencies() -> bool:
                 
                 continue
 
-            run_result = run_command(["pip", "uninstall", "-y", pip_name], cwd)
+            run_result = run_command(["pip", "uninstall", "-y", pip_name])
 
             if run_result.returncode != 0:
                 
