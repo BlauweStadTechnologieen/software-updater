@@ -6,6 +6,7 @@ import requests
 from requests.exceptions import HTTPError
 from install_new_dependencies import update_requirements
 from create_env_bundle import create_env_files
+import package_management
 
 
 def extract_zip_flat(zip_path:str, target_dir:str):
@@ -181,7 +182,7 @@ def version_check(repo_name:str, cwd:str, organization_owner:str) -> bool:
                 
             else:
                 
-                print("No new release found, current version is up to date.")
+                print("No new releases found, current version is up to date.")
                 
                 return False
 
@@ -360,13 +361,15 @@ def validate_mql5_directory() -> str | None:
 def check_for_updates():
     
     """
-    Loops through all of the specified directories by constructing each directory, checks for their validity, checks for any changes before installing them.
-    This will check the validity of the base directory first. If this fails, the script will exit early.
-    Notes:
-    -
-    Any exceptions or error will be handles and processed by the `error_handler` module.
+    Iterates through the specified directories, validates them, and installs updates only if changes are detected.
+    The base directory is validated first; if invalid, the script exits early.
+    All exceptions and errors are handled by the `error_handler` module.
     """
 
+    if not package_management.install_dependencies():
+
+        return None
+    
     root_directory          = validate_base_directory()
     personal_access_token   = validate_personal_access_token()
     organization_owner      = github_owner_validation(personal_access_token)
@@ -437,6 +440,10 @@ def check_for_updates():
             print("Updated Packages present....")
                         
             send_message(updated_software_packages)
+
+        if not package_management.uninstall_dependencies():
+
+            return None    
 
     except OSError as e:
 
