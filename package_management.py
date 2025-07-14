@@ -126,6 +126,8 @@ def uninstall_dependencies() -> bool:
                 
                 continue
 
+            print(f"Uninstalling {import_name}....")
+
             run_result = run_command(["pip", "uninstall", "-y", pip_name])
 
             if run_result.returncode != 0:
