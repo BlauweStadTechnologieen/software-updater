@@ -5,6 +5,8 @@ from subprocess import CompletedProcess
 import importlib.util
 import sys
 
+#print("Script started from:", sys.argv[0])
+
 def run_command(command:list[str], cwd:str = None) -> CompletedProcess | None:
     """
     Executes a shell command in the specified working directory.
@@ -170,7 +172,7 @@ def is_in_venv() -> bool:
 
     if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
         
-        print("You are in a virtual environment.")
+        print("You are in a virtual environment. No packages will be installed or removed at this point.")
         
         return True
     
@@ -179,5 +181,3 @@ def is_in_venv() -> bool:
         print("You are not on a virtual environment, now managing initial git packages....")
 
         return False
-
-is_in_venv()
