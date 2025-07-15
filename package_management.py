@@ -102,8 +102,6 @@ def install_dependencies() -> bool:
                 return False
             
             print(f"{pip_name} has been successfully installed.")
-
-        print("All initial packages have been successfully installed. If there is a missing package, contact your administrator.")
         
         return True  
 
