@@ -178,6 +178,6 @@ def is_in_venv() -> bool:
     
     else:
 
-        print("You are not on a virtual environment, now managing initial git packages....")
+        print("You are not in a virtual environment, now managing initial git packages....")
 
         return False
