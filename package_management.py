@@ -48,10 +48,15 @@ def dependancies_list() -> dict[str, str]:
     Returns:
         dict[str, str]: A dictionary where the keys are package names and the values are their identifiers.
     """
+    
     packages = {
 
-        "dotenv"    : "python-detenv",
-        "requests"  : "requests"
+        "dotenv"            : "python-detenv",
+        "requests"          : "requests",
+        "charset-normalizer": "charset-normalizer",
+        "idna"              : "idna",
+        "urllib3"           : "urllib3",
+        "cerfiti"           : "certifi"
 
     }
     
