@@ -3,6 +3,7 @@ from error_handler import global_error_handler
 import subprocess
 from subprocess import CompletedProcess
 import importlib.util
+import sys
 
 def run_command(command:list[str], cwd:str = None) -> CompletedProcess | None:
     """
@@ -77,7 +78,7 @@ def install_dependencies() -> bool:
 
         for import_name, pip_name in packages.items():
             
-            if ".venv" in os.getcwd():
+            if is_in_venv():
 
                 break
             
@@ -131,7 +132,7 @@ def uninstall_dependencies() -> bool:
 
         for import_name, pip_name in packages.items():
 
-            if ".venv" not in os.getcwd():
+            if is_in_venv():
 
                 break
             
@@ -164,3 +165,19 @@ def uninstall_dependencies() -> bool:
         global_error_handler(error_subject, error_message)
 
         return False
+    
+def is_in_venv() -> bool:
+
+    if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
+        
+        print("You are in a virtual environment.")
+        
+        return True
+    
+    else:
+
+        print("You are not on a virtual environment, now managing initial git packages....")
+
+        return False
+
+is_in_venv()
