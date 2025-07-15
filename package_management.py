@@ -77,6 +77,10 @@ def install_dependencies() -> bool:
 
         for import_name, pip_name in packages.items():
             
+            if ".venv" in os.getcwd():
+
+                break
+            
             if is_package_installed(import_name): ## Already Installed
                     
                 print(f"{import_name} is already installed.")
@@ -127,6 +131,10 @@ def uninstall_dependencies() -> bool:
 
         for import_name, pip_name in packages.items():
 
+            if ".venv" not in os.getcwd():
+
+                break
+            
             if not is_package_installed(import_name):
                 
                 continue
