@@ -67,11 +67,16 @@ def dependancies_list() -> dict[str, str]:
 
 def install_dependencies() -> bool:
     """
-    Installs initial Python package dependencies required for the application.
+    Installs initial Python package dependencies for the initialization of the package.
+    
+    Subsequent runs of this package - as far as dependancies are converned - will be managed by the virtual environment which will be installed on initialization.
+    
     This function checks if specific packages are installed, and if not, attempts to install them using pip.
     If any installation fails or an exception occurs, it logs the error using the global error handler and returns False.
     Returns:
         bool: True if all dependencies are installed successfully, False otherwise.
+    Raises:
+        Exception: Any error occuring during the installation will be logged to the global_error_handler and returns False.
     """
 
     try:
@@ -94,13 +99,8 @@ def install_dependencies() -> bool:
             
             if run_result.returncode != 0:
 
-                error_subject = f"Dependency Installation Failed {import_name}"
-                error_message = f"Pip installation of {pip_name} failed with a return code of {run_result.returncode}"
-
-                global_error_handler(error_subject, error_message)
-
-                return False
-            
+                raise Exception(f"Dependency Installation Failed for {import_name}. Please refer to return code {run_result.returncode}.")
+                            
             print(f"{pip_name} has been successfully installed.")
         
         return True  
@@ -116,14 +116,16 @@ def install_dependencies() -> bool:
     
 def uninstall_dependencies() -> bool:
     """
-    Uninstalls all dependencies listed in the initialized packages.
-    Iterates through the packages returned by `dependancies_list()`, checks if each package is installed,
+    Uninstalls all dependencies listed in the initialized packages & cleans up the resources used on the initialization of a new update.
+    This will iterate through the packages returned by `dependancies_list()`, checks if each package is installed,
     and attempts to uninstall it using pip. Handles errors during uninstallation and reports them
     using the global error handler.
+
     Returns:
         bool: True if all dependencies were uninstalled successfully, False otherwise.
-    Exceptions:
-        Handles all exceptions, logs them via the global error handler, and returns False.
+    
+    Raises:
+        Exception: Handles all exceptions, logs them via the global error handler, and returns False.
     """
 
     try:
@@ -146,13 +148,8 @@ def uninstall_dependencies() -> bool:
 
             if run_result.returncode != 0:
                 
-                error_subject = f"Error {run_result.returncode}"
-                error_message = f"There was an error in uninstalling {import_name}. Please refer to error message: {run_result.stderr}"
+                raise Exception(f"Dependency Uninstallation Failed for {import_name}. Please refer to return code {run_result.returncode}.")
 
-                global_error_handler(error_subject, error_message)
-
-                return False
-            
             print(f"{import_name} is been successfully cleaned up.")
                     
         return True
