@@ -2,7 +2,7 @@ import freshdesk_ticket
 import logging
 import sys
 
-def global_error_handler(subject:str, message:str, logging_level = logging.DEBUG, file_log = "log" ) -> None:
+def global_error_handler(subject:str, message:str, logging_level = logging.DEBUG, file_log = "log.log" ) -> None:
     """
     Handles and processes the reporting of all error and exceptions via the Freshdesk system.
     Args:
@@ -53,3 +53,5 @@ def missing_keys(dictionary:dict[str:str]):
         sys.exit()
 
     return dictionary
+
+global_error_handler("Test Subjecy", "Test Message", logging_level=logging.CRITICAL)
