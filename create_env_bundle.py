@@ -112,7 +112,24 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
         return None
     
 def create_requirements_file(cwd:str) -> str | None:
-
+    """
+    Create a `requirements.txt` file in the provided working directory if it does not already exist.
+    This function logs progress via `global_error_handler`, checks for an existing
+    requirements file, and if missing, writes a default file containing:
+    - Manual installation instructions
+    - A note about `SKIP_DEPENDENCY_INSTALLATION`
+    - A cleanup command comment
+    - Default dependencies (`python-dotenv`, `requests`)
+    Args:
+        cwd (str): Absolute or relative path to the target working directory.
+    Returns:
+        str | None: Full path to `requirements.txt` if it exists or is created
+        successfully; otherwise `None` if an unexpected error occurs.
+    Raises:
+        None: All exceptions are caught internally and reported through
+        `global_error_handler`.
+    """
+    
     global_error_handler("Creating requirements.txt file", "Now we're creating the requirements.txt file...")
     
     dependancies_path =  os.path.join(cwd, "requirements.txt")
@@ -125,7 +142,7 @@ def create_requirements_file(cwd:str) -> str | None:
         
         with open(dependancies_path, "w") as f:
 
-            f.write(f"#If you need to manually install the dependencies, please refer to the following instructions:\n#1 Navigate to {cwd}\n#2 Activate .venv\n#3 Run the following command: pip install -r requirements.txt\n#Contact Support: hello@bluecitycapital.com\n")
+            f.write(f"#Contact Support: hello@bluecitycapital.com\n")
             f.write(f"#If you want to test without installing the dependencies, you can set the environment variable SKIP_DEPENDENCY_INSTALLATION to 'true' in your .env file.\n\n")
             f.write(f"#pip freeze > packages.txt && pip uninstall -r packages.txt -y\n")
             f.write("python-dotenv\n")
