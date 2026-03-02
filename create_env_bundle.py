@@ -135,10 +135,6 @@ def create_requirements_file(cwd:str) -> str | None:
     dependancies_path =  os.path.join(cwd, "requirements.txt")
 
     try:
-    
-        if os.path.exists(dependancies_path):
-
-            return dependancies_path
         
         with open(dependancies_path, "w") as f:
 
@@ -148,6 +144,8 @@ def create_requirements_file(cwd:str) -> str | None:
             f.write("python-dotenv\n")
             f.write("requests\n")
 
+        global_error_handler("Successfully created requirements.txt file", f"requirements.txt file created in {cwd}")
+        
         return dependancies_path
     
     except Exception as e:
