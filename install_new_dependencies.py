@@ -8,15 +8,29 @@ logger = logging.getLogger(__name__)
 
 def check_and_install_new_dependencies(requirements_file:str ="requirements.txt", hash_file=".requirements_hash") -> None:
     """
-    After it checks for the existece of the file denoted in the `requreiments_file` arguement, it then checks for changes in requirements.txt file and installs dependencies if changes are detected. This is achieved by detetching any changes in the `current_hash` file. If this differt from the previous hash, it executes the script.
-
-    Args:
-        requirements_file(str, optional): Denoted the name of the file containing the updated list of dependancies.
-        .requirements_has(str, optional): Denotes the name of the file containg the has of the latest commit.
-    Notes:
-    -
-    Should an error be detected, the `global_error_handler` function is called, which will process the error and generate a support ticket, which is then sent to the relevant department.
+    Check for changes in requirements file and install dependencies if modifications are detected.
     
+    Compares the SHA-256 hash of the requirements file against a stored hash to detect changes.
+    If changes are found, installs all dependencies using pip and updates the stored hash.
+    
+    Args:
+        requirements_file (str, optional): Path to the requirements file containing dependency specifications.
+            Defaults to "requirements.txt".
+        hash_file (str, optional): Path to the file storing the SHA-256 hash of the last processed
+            requirements file. Defaults to ".requirements_hash".
+    
+    Returns:
+        None
+    
+    Side Effects:
+        - Executes subprocess commands to install dependencies via pip
+        - Creates or updates the hash file with the current requirements file hash
+        - Logs status and error messages through global_error_handler
+    
+    Notes:
+        - If the requirements file doesn't exist, logs an INFO message and returns early
+        - On installation failure, logs an ERROR message through global_error_handler
+        - Installation success updates the stored hash to prevent redundant reinstalls
     """
     def compute_hash(file_path):
         """Computes the hash of a file."""
