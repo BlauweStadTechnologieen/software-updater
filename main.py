@@ -1,13 +1,14 @@
 import os
 from error_handler import global_error_handler
-from send_message import send_message
 import zipfile
-import requests
-from requests.exceptions import HTTPError
 from install_new_dependencies import update_requirements
 from create_env_bundle import create_env_files
-import package_management
+import getpass
+from urllib import request, error
+import json
+import logging
 
+logger = logging.getLogger(__name__)
 
 def extract_zip_flat(zip_path:str, target_dir:str):
     
@@ -38,7 +39,7 @@ def extract_zip_flat(zip_path:str, target_dir:str):
 
 def get_latest_tag(repo_name:str, organization_name:str, organization_token:str) -> dict:
     
-    print(f"Fetching latest tag for {repo_name}...")
+    global_error_handler("Fetching latest tag", f"Attempting to fetch the latest tag for {repo_name} from GitHub....", logging_level=logging.INFO)
 
     try:
 
@@ -46,40 +47,34 @@ def get_latest_tag(repo_name:str, organization_name:str, organization_token:str)
     
         headers = {
 
-            "User-Agent": "Updater/1.0",
-            "Authorization": f"token {organization_token}",
+            "User-Agent"    : "Updater/1.0",
+            "Authorization" : f"token {organization_token}",
 
         }
 
-        response = requests.get(url, headers=headers)
+        req = request.Request(url, headers=headers, method="GET")
 
-        response.raise_for_status()
+        with request.urlopen(req) as response:
+            body                     = response.read().decode("utf-8")
+            get_latest_release_tag   = json.loads(body)
 
-        get_latest_release_tag = response.json()
-
-        latest_release_tag = get_latest_release_tag.get("tag_name") 
+            latest_release_tag = get_latest_release_tag.get("tag_name") 
         
-        if not latest_release_tag:
+            if not latest_release_tag:
+                
+                raise ValueError(f"No tags found for {repo_name}, please ensure that you have created a tag for the latest release.")
             
-            raise ValueError(f"No tags found for {repo_name}, please ensure that you have created a tag for the latest release.")
-        
-        return latest_release_tag 
+            return latest_release_tag 
     
-    except HTTPError as e:
-
-        global_error_handler("GitHub API HTTP Error", f"HTTP error occurred while fetching tags for {repo_name}: {e}")
+    except error.HTTPError as e:
         
-        return None
-    
-    except requests.RequestException as e:
-        
-        global_error_handler("GitHub API Request Error", f"Failed to fetch tags for {repo_name}: {e}")
+        global_error_handler("GitHub API HTTP Error", f"Failed to fetch tags for {repo_name}: {e.code} - {e.reason}", logging_level=logging.ERROR)
 
         return None
     
     except Exception as e:
         
-        global_error_handler("Tag Retrieval Error", f"An error occurred while retrieving the latest tag for {repo_name}: {e}")
+        global_error_handler("Tag Retrieval Error", f"An error occurred while retrieving the latest tag for {repo_name}: {e}", logging_level=logging.ERROR)
         
         return None
 
@@ -93,16 +88,18 @@ def install_updates(repo_name:str, target_dir:str, organization_owner:str, organ
     zip_url     = f"https://github.com/{organization_owner}/{repo_name}/archive/refs/tags/{release_tag}.zip"
     zip_path    = os.path.join(target_dir, "temp_repo.zip")
 
-    if not version_check(repo_name, target_dir, organization_owner):
+    if not version_check(repo_name, target_dir, organization_owner) or not release_tag:
         
         return False
     
     try:
-        response = requests.get(zip_url)
-        response.raise_for_status()
+        
+        req = request.Request(zip_url, method="GET")
 
-        with open(zip_path, "wb") as f:
-            f.write(response.content)
+        with request.urlopen(req) as response:
+        
+            with open(zip_path, "wb") as f:
+                f.write(response.read())
 
         # Extract directly into the target directory
         extract_zip_flat(zip_path, target_dir)
@@ -112,23 +109,15 @@ def install_updates(repo_name:str, target_dir:str, organization_owner:str, organ
         
         return True
     
-    except requests.RequestException as e:
+    except error.HTTPError as e:
         
-        print(f"Request to {zip_url} failed with status {response.status_code}")
-        
-        global_error_handler("Request Exception Error", f"Failed to download and install the latest release of {repo_name}: {e}")
-        
-        return False
-    
-    except HTTPError as e:
-        
-        global_error_handler("HTTP Error", f"A HTTP error occurred while downloading {repo_name}: {e}")
+        global_error_handler("HTTP Error", f"A HTTP error occurred while downloading {repo_name}: {e.code} - {e.reason}", logging_level=logging.ERROR)
         
         return False
     
     except Exception as e:
         
-        global_error_handler("Installation failure", f"Failed to update {repo_name}: {e}")
+        global_error_handler("Installation failure", f"Failed to update {repo_name}: {e}", logging_level=logging.ERROR)
         
         return False
     
@@ -148,62 +137,64 @@ def version_check(repo_name:str, cwd:str, organization_owner:str) -> bool:
 
         release_file_dir = os.path.join(cwd, release_file)
         
-        response = requests.get(api_url)
+        req = request.Request(api_url, method="GET")
 
-        if response.status_code == 200:
+        with request.urlopen(req) as response:
             
-            release_data = response.json()
-
-            if not release_data:
-                
-                global_error_handler("No releases found", "This repository has no releases available.")
-
-                return False
-
-            if os.path.exists(release_file_dir):
-                
-                with open(release_file_dir, "r") as f:
-
-                    stored_release = f.read().strip()
-
-            else:
-
-                stored_release = None
-
-            latest_release = release_data[0]["tag_name"]
-
-            if stored_release != latest_release:
-
-                with open(release_file_dir, "w") as f:
-
-                    f.write(latest_release)
-
-                    return True
-                
-            else:
-                
-                print("No new releases found, current version is up to date.")
-                
-                return False
-
-        else:
-
-            raise Exception(f"Failed to fetch latest release data: {response.status_code} - {response.text}")
-                    
-    except requests.RequestException as e:
+            body = response.read().decode("utf-8")
         
-        global_error_handler("Version Check Error", f"An error occurred while checking the version of {repo_name}: {e}")
+            if response.getcode() == 200:
+                
+                release_data = json.loads(body)
+
+                if not release_data:
+                    
+                    global_error_handler("No releases found", "This repository has no releases available.", logging_level=logging.INFO)
+
+                    return False
+
+                if os.path.exists(release_file_dir):
+                    
+                    with open(release_file_dir, "r") as f:
+
+                        stored_release = f.read().strip()
+
+                else:
+
+                    stored_release = None
+
+                latest_release = release_data[0]["tag_name"]
+
+                if stored_release != latest_release:
+
+                    with open(release_file_dir, "w") as f:
+
+                        f.write(latest_release)
+
+                        return True
+                    
+                else:
+                    
+                    global_error_handler("No update required", f"The latest version of {repo_name} is already installed.", logging_level=logging.INFO)
+                    
+                    return False
+
+            else:
+
+                raise Exception(f"Failed to fetch latest release data: {response.getcode()} - {response.read().decode('utf-8')}")
+                    
+    except error.HTTPError as e:
+        
+        global_error_handler("Version Check Error", f"An error occurred while checking the version of {repo_name}: {e.code} - {e.reason}", logging_level=logging.ERROR)
 
         return False
 
     except Exception as e:
         
-        global_error_handler("Version Check Error", f"An unexpected error occurred while checking the version of {repo_name}: {e}")
+        global_error_handler("Version Check Error", f"An unexpected error occurred while checking the version of {repo_name}: {e}", logging_level=logging.ERROR)
 
         return False
     
-import os
-
 def validate_base_directory() -> str | None:
     
     while True:
@@ -225,115 +216,198 @@ def validate_base_directory() -> str | None:
 
         except (ValueError, FileNotFoundError, NotADirectoryError) as e:
 
-            global_error_handler("Invalid base directory", str(e))
+            global_error_handler(type(e).__name__, str(e), logging_level=logging.WARNING)
 
 def validate_personal_access_token() -> str | None:
-
-    import getpass
-    
+    """
+    Prompts the user for a GitHub Personal Access Token (PAT) and validates it.
+    Loops until a valid token is provided or the user cancels.
+    Returns the validated token string.
+    """
     while True:
-    
         try:
-        
-            personal_access_token = getpass.getpass("Please enter your Gethub Personal Access Token (PAT).....").strip()
-            
+            # Prompt user securely
+            personal_access_token = getpass.getpass(
+                "Please enter your GitHub Personal Access Token (PAT): "
+            ).strip()
+
             if not personal_access_token:
+                raise ValueError("No Personal Access Token entered. This is required.")
 
-                raise KeyError("No Personal Access Token was entered, this is a mandatory entry....")
-            
             if len(personal_access_token) < 40:
+                raise ValueError("Invalid Personal Access Token length.")
 
-                raise ValueError("Invalid Personal Access Token length")
-            
-            headers = {"Authorization": f"token {personal_access_token}"}
-            response = requests.get("https://api.github.com/user", headers=headers)
-            
-            response.raise_for_status()
-            
-            return personal_access_token
-        
-        except (HTTPError, KeyError, ValueError) as e:
+            headers = {
+                "Authorization": f"token {personal_access_token}",
+                "User-Agent": "Updater/1.0",
+                "Accept": "application/vnd.github.v3+json",
+            }
 
-            global_error_handler("Invalid Personal Access Token",f"{e}")
+            req = request.Request(
+                "https://api.github.com/user",
+                headers=headers,
+                method="GET"
+            )
+
+            # Validate token by making request
+            with request.urlopen(req):
+                global_error_handler(
+                    "GitHub token validated",
+                    "Personal Access Token validated successfully.",
+                    logging_level=logging.INFO
+                )
+                return personal_access_token
+
+        except error.HTTPError as e:
+            if e.code == 401:
+                global_error_handler(
+                    "Invalid GitHub token",
+                    "The provided token is invalid or expired.",
+                    logging_level=logging.WARNING
+                )
+            else:
+                global_error_handler(
+                    "GitHub API error",
+                    f"HTTP {e.code} during token validation: {e.reason}",
+                    logging_level=logging.ERROR
+                )
+
+        except error.URLError as e:
+            global_error_handler(
+                "Network error",
+                f"Could not connect to GitHub: {e.reason}",
+                logging_level=logging.ERROR
+            )
+
+        except ValueError as e:
+            global_error_handler(
+                "Invalid input",
+                str(e),
+                logging_level=logging.WARNING
+            )
 
 def github_owner_validation(personal_access_token: str) -> str | None:
     
-    from requests.exceptions import HTTPError
-
-    headers={
-
+    headers = {
         "Authorization": f"token {personal_access_token}",
-        "Accept": "application/vnd.github.v3+json"
+        "User-Agent": "Updater/1.0",
+        "Accept": "application/vnd.github.v3+json",
     }
-        
+
     try:
-        
-        # First, get the authenticated user
+        req = request.Request(
+            "https://api.github.com/user",
+            headers=headers,
+            method="GET"
+        )
 
-        github_api_user = "https://api.github.com/user"
-        auth_response   = requests.get(github_api_user, headers=headers)
+        with request.urlopen(req) as response:
+            body = response.read().decode("utf-8")
+            authenticated_user = json.loads(body)["login"]
 
-        auth_response.raise_for_status()
-        
-        authenticated_user = auth_response.json()["login"]
+    except error.HTTPError as e:
+        if e.code == 401:
+            global_error_handler(
+                "Unauthorized GitHub token",
+                "The provided GitHub Personal Access Token is invalid or expired.",
+                logging_level=logging.ERROR
+            )
+        else:
+            global_error_handler(
+                "GitHub API error",
+                f"HTTP {e.code} while retrieving authenticated user: {e.reason}",
+                logging_level=logging.ERROR
+            )
+        return None
 
-    except HTTPError as e:
-
-        raise RuntimeError("Failed to authenticate with the provided GitHub token") from e
+    except error.URLError as e:
+        global_error_handler(
+            "Network error",
+            f"Network error occurred while validating GitHub token: {e.reason}",
+            logging_level=logging.ERROR
+        )
+        return None
 
     while True:
-        
+
         try:
 
-            organization_owner = input("Enter the GitHub owner (username or org): ").strip()
+            organization_owner = input(
+                "Enter the GitHub owner (username or org): "
+            ).strip()
 
             if not organization_owner:
-                raise KeyError("No GitHub owner was specified")
+                raise ValueError("No GitHub owner was specified.")
 
-            # Check existence of org first, then fallback to user
-            github_api_orgs = f"https://api.github.com/orgs/{organization_owner}"
-            
-            response = requests.get(github_api_orgs, headers=headers)
+            # ---- First try org endpoint ----
+            org_url = f"https://api.github.com/orgs/{organization_owner}"
+            req = request.Request(org_url, headers=headers, method="GET")
 
-            if response.status_code == 404:
+            try:
+                with request.urlopen(req):
+                    owner_exists = True
+            except error.HTTPError as e:
+                if e.code == 404:
+                    owner_exists = False
+                else:
+                    raise
 
-                github_api_users = f"https://api.github.com/users/{organization_owner}"
+            # ---- If org not found, try user endpoint ----
+            if not owner_exists:
+                user_url = f"https://api.github.com/users/{organization_owner}"
+                req = request.Request(user_url, headers=headers, method="GET")
 
-                response = requests.get(github_api_users, headers=headers)
+                try:
+                    with request.urlopen(req):
+                        owner_exists = True
+                except error.HTTPError as e:
+                    if e.code == 404:
+                        raise ValueError("No GitHub user or organization found.")
+                    else:
+                        raise
 
-            response.raise_for_status()
-
+            # ---- Ensure it matches authenticated user ----
             if organization_owner != authenticated_user:
+                raise PermissionError(
+                    f"The GitHub owner '{organization_owner}' does not match "
+                    f"the authenticated user '{authenticated_user}'."
+                )
 
-                raise PermissionError(f"The GitHub owner '{organization_owner}' does not match the authenticated user '{authenticated_user}'.")
+            global_error_handler(
+                "GitHub owner validated",
+                f"Owner '{organization_owner}' validated successfully.",
+                logging_level=logging.INFO
+            )
 
-            print(f"Owner '{organization_owner}' validated and matches the authenticated user.")
-            
             return organization_owner
 
+        except ValueError as e:
+            global_error_handler(
+                "GitHub owner validation error",
+                str(e),
+                logging_level=logging.WARNING
+            )
+
         except PermissionError as e:
+            global_error_handler(
+                "GitHub owner validation error",
+                str(e),
+                logging_level=logging.WARNING
+            )
 
-            print(f"Permission Error: {e}")
+        except error.HTTPError as e:
+            global_error_handler(
+                "GitHub API error",
+                f"HTTP {e.code} during owner validation: {e.reason}",
+                logging_level=logging.ERROR
+            )
 
-        except HTTPError as e:
-
-            status = e.response.status_code
-
-            if status == 401:
-
-                print("Unauthorized: Token is invalid or expired.")
-
-            elif status == 404:
-
-                print("Not Found: No such GitHub user/org.")
-
-            else:
-
-                print(f"HTTP Error: {e}")
-
-        except KeyError as e:
-
-            print(f"input Error: {e}")
+        except error.URLError as e:
+            global_error_handler(
+                "Network error",
+                f"Network error during owner validation: {e.reason}",
+                logging_level=logging.ERROR
+            )
 
 def validate_mql5_directory() -> str | None:
 
@@ -356,7 +430,7 @@ def validate_mql5_directory() -> str | None:
 
         except (ValueError, FileNotFoundError, NotADirectoryError) as e:
 
-            global_error_handler("Invalid MQL5 directory", str(e))
+            global_error_handler(type(e).__name__, str(e), logging_level=logging.WARNING)
 
 def check_for_updates():
     
@@ -365,10 +439,6 @@ def check_for_updates():
     The base directory is validated first; if invalid, the script exits early.
     All exceptions and errors are handled by the `error_handler` module.
     """
-
-    if not package_management.install_dependencies():
-
-        return None
     
     root_directory          = validate_base_directory()
     personal_access_token   = validate_personal_access_token()
@@ -423,7 +493,7 @@ def check_for_updates():
             
             if software_package not in REPO_MAPPING.keys():
 
-                print(f"Skipping {software_package} as it is not in the mapping.")
+                global_error_handler("Package skipped", f"Skipped {software_package} as it is not in the repository mapping.", logging_level=logging.INFO)
                 
                 continue
 
@@ -437,14 +507,8 @@ def check_for_updates():
         
         if updated_software_packages:
 
-            print("Updated Packages present....")
-                        
-            send_message(updated_software_packages)
-
-        if not package_management.uninstall_dependencies():
-
-            return None    
-
+            global_error_handler("Updates installed", f"The following packages were updated: {', '.join(updated_software_packages)}", logging_level=logging.INFO)
+                      
     except OSError as e:
 
         global_error_handler("OS Error","There was an error when running a subprocess")

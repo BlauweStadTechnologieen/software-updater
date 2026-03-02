@@ -10,5 +10,5 @@ dotenv_constants = {
     "SENDER_NAME":"<SENDER_NAME>",
     "SENDER_EMAIL":"<SENDER_EMAIL>",
     "SENDER_DEPARTMENT":"Engineering",
-    "PACKAGE_NAME":"<PACKAGE_NAME>"
+    "PACKAGE_NAME":"BlueCityCapital".strip().lower(),
 }

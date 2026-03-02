@@ -1,7 +1,10 @@
 import hashlib
 import subprocess
 import os
-import error_handler
+from error_handler import global_error_handler
+import logging
+
+logger = logging.getLogger(__name__) 
 
 def check_and_install_new_dependencies(requirements_file:str ="requirements.txt", hash_file=".requirements_hash") -> None:
     """
@@ -12,7 +15,7 @@ def check_and_install_new_dependencies(requirements_file:str ="requirements.txt"
         .requirements_has(str, optional): Denotes the name of the file containg the has of the latest commit.
     Notes:
     -
-    Should an error be detected, the `error_handler` module is called, when will process the error and generate a support ticket, which is then sent to tee relevant department.
+    Should an error be detected, the `global_error_handler` function is called, which will process the error and generate a support ticket, which is then sent to the relevant department.
     
     """
     def compute_hash(file_path):
@@ -25,7 +28,7 @@ def check_and_install_new_dependencies(requirements_file:str ="requirements.txt"
     if not os.path.exists(requirements_file):
         custom_message = f"{requirements_file} not found!"
         custom_subject = "Requirements.txt file not found"
-        error_handler.global_error_handler(custom_subject, custom_message)
+        global_error_handler(custom_subject, custom_message, logging_level=logging.INFO)
         return
 
     # Compute the current hash of requirements.txt
@@ -39,20 +42,26 @@ def check_and_install_new_dependencies(requirements_file:str ="requirements.txt"
 
     # Compare hashes and install dependencies if there are changes
     if current_hash != stored_hash:
-        print("Changes detected in requirements.txt. Installing dependencies...")
+
+        global_error_handler("Dependency Update", "Changes detected in requirements.txt. Starting dependency installation process....", logging_level=logging.INFO)
+        
         try:
             subprocess.run(["pip", "install", "-r", requirements_file])
             # Update the stored hash
             with open(hash_file, "w") as f:
                 f.write(current_hash)
-            print("Dependencies installed successfully.")
+
+            global_error_handler("Dependency Update", "Dependencies installed successfully.", logging_level=logging.INFO)
+        
         except subprocess.CalledProcessError as e:
+
             custom_message = f"Failed to install dependencies: {e}"
             custom_subject = "Dependancy installation failure"
-            error_handler.global_error_handler(custom_subject, custom_message)
+
+            global_error_handler(custom_subject, custom_message, logging_level=logging.ERROR)
+
             return
         
-
 def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") -> bool:
     """
     Installs or updates dependencies from requirements.txt using the virtual environment.
@@ -72,32 +81,32 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
 
         subprocess.run([python_executable, "-m", "pip", "install", "--upgrade", "pip"], check=True, capture_output=True, text=True)
 
-        print("Pip version successfully upgraded!")
+        global_error_handler("PIP Upgrade", "Pip version successfully upgraded!", logging_level=logging.INFO)
 
     except subprocess.CalledProcessError as e:
 
-        error_handler("PIP Upgrade Failed",f"subprocess.CalledProcessError:\nReturn code: {e.returncode}\nOutput: {e.output}\nError: {e.stderr}")
+        global_error_handler("PIP Upgrade Failed",f"subprocess.CalledProcessError:\nReturn code: {e.returncode}\nOutput: {e.output}\nError: {e.stderr}")
 
     except FileNotFoundError as e:
 
-        error_handler("Python or pip not found",f"FileNotFoundError:\n{e}")
+        global_error_handler("Python or pip not found",f"FileNotFoundError:\n{e}", logging_level=logging.ERROR)
 
     except Exception as e:
 
-        error_handler("Unexpected Error During PIP Upgrade",f"{type(e).__name__}: {e}")
+        global_error_handler("Unexpected Error During PIP Upgrade",f"{type(e).__name__}: {e}", logging_level=logging.ERROR)
 
     if not os.path.exists(pip_executable) or not os.path.exists(requirements_path):
         
         custom_message = "Virtual environment or requirements.txt not found."
         custom_subject = "Dependency Installation Error"
         
-        error_handler.global_error_handler(custom_subject, custom_message)
+        global_error_handler(custom_subject, custom_message, logging_level=logging.ERROR)
 
         return False
 
     try:
         
-        print("Updating dependencies...")
+        global_error_handler("Dependency Update", "Starting dependency update process....", logging_level=logging.INFO)
 
         subprocess.run([pip_executable, "install", "--upgrade", "-r", requirements_path], check=True)
 
@@ -109,7 +118,7 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
                 
                 raise subprocess.CalledProcessError(pip_freeze.returncode, pip_freeze.stderr, "pip freeze command failed")
         
-        print("Dependencies updated successfully.")
+        global_error_handler("Dependency Update", "Dependencies updated successfully.", logging_level=logging.INFO)
 
         return True
 
@@ -118,7 +127,7 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
         custom_message = f"Failed to install dependencies: {e}"
         custom_subject = "Dependency Installation Failure"
 
-        error_handler.global_error_handler(custom_subject, custom_message)
+        global_error_handler(custom_subject, custom_message, logging_level=logging.ERROR)
 
         return False
     
@@ -126,6 +135,6 @@ def update_requirements(cwd: str, dependancy_filename:str = "requirements.txt") 
         custom_message = f"An unexpected error occurred: {e}"
         custom_subject = "Unexpected Error in Dependency Installation"
 
-        error_handler.global_error_handler(custom_subject, custom_message)
+        global_error_handler(custom_subject, custom_message, logging_level=logging.ERROR)
 
         return False    

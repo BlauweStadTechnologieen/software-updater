@@ -1,4 +1,3 @@
-import os
 from error_handler import global_error_handler
 import subprocess
 from subprocess import CompletedProcess
@@ -91,7 +90,7 @@ def install_dependencies() -> bool:
             
             if is_package_installed(import_name): ## Already Installed
                     
-                print(f"{import_name} is already installed.")
+                global_error_handler("Dependency Check", f"{import_name} is already installed. Skipping installation....")
                 
                 continue
                
@@ -101,7 +100,7 @@ def install_dependencies() -> bool:
 
                 raise Exception(f"Dependency Installation Failed for {import_name}. Please refer to return code {run_result.returncode}.")
                             
-            print(f"{pip_name} has been successfully installed.")
+            global_error_handler("Dependency Installation", f"{pip_name} has been successfully installed.")
         
         return True  
 
@@ -142,7 +141,7 @@ def uninstall_dependencies() -> bool:
                 
                 continue
 
-            print(f"Uninstalling {import_name}....")
+            global_error_handler("Dependency Uninstallation", f"Uninstalling {import_name}....")
 
             run_result = run_command(["pip", "uninstall", "-y", pip_name])
 
@@ -150,7 +149,7 @@ def uninstall_dependencies() -> bool:
                 
                 raise Exception(f"Dependency Uninstallation Failed for {import_name}. Please refer to return code {run_result.returncode}.")
 
-            print(f"{import_name} is been successfully cleaned up.")
+            global_error_handler("Dependency Uninstallation", f"{import_name} has been successfully cleaned up.")
                     
         return True
     
@@ -167,12 +166,12 @@ def is_in_venv() -> bool:
 
     if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
         
-        print("You are in a virtual environment. No packages will be installed or removed at this point.")
+        global_error_handler("Virtual Environment Detected", "A virtual environment is detected. Skipping initial dependency management and now managing dependencies through the virtual environment....")
         
         return True
     
     else:
 
-        print("You are not in a virtual environment, now managing initial git packages....")
+        global_error_handler("No Virtual Environment Detected", "No virtual environment detected. Managing dependencies through pip for the current Python environment....")
 
         return False

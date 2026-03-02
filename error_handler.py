@@ -1,8 +1,7 @@
-import freshdesk_ticket
 import logging
 import sys
 
-def global_error_handler(subject:str, message:str, logging_level = logging.DEBUG, file_log = "log.log" ) -> None:
+def global_error_handler(subject:str, message:str, logging_level = logging.INFO) -> None:
     """
     Handles and processes the reporting of all error and exceptions via the Freshdesk system.
     Args:
@@ -16,7 +15,7 @@ def global_error_handler(subject:str, message:str, logging_level = logging.DEBUG
     logging.basicConfig(
 
         level=logging_level,
-        filename=file_log,
+        filename="log.log",
         filemode='a',
         format='%(levelname)s: %(message)s'
 
@@ -26,15 +25,8 @@ def global_error_handler(subject:str, message:str, logging_level = logging.DEBUG
 
     logging.log(logging_level, log_message)
 
-    if logging_level <= logging.WARNING:
+    return None
 
-        return None
-    
-    if logging_level >= logging.ERROR:
-
-        freshdesk_ticket.create_freshdesk_ticket(message, subject)
-
-        sys.exit(f"The script has encountered a {logging_level} incident, & will now exit. Please check the error log for details.")
 
 def missing_keys(dictionary:dict[str:str]):
     
@@ -54,4 +46,6 @@ def missing_keys(dictionary:dict[str:str]):
 
     return dictionary
 
-global_error_handler("Test Subjecy", "Test Message", logging_level=logging.CRITICAL)
+
+if __name__ == "__main__":
+    global_error_handler("Test Subject", "Test Message", logging_level=logging.DEBUG)
