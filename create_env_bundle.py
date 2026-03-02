@@ -2,6 +2,9 @@ import os
 import subprocess
 from dotenv_constants import dotenv_constants
 from error_handler import global_error_handler
+import logging
+
+logger = logging.getLogger(__name__)
 
 def run_command(cmd: str, cwd:str) -> None:
     return subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
@@ -16,16 +19,16 @@ def create_bat_file(cwd: str) -> str | None:
         None
     Notes:
         - If the 'run.bat' file already exists, the function returns without making changes.
-        - If an exception occurs during file creation, it prints a custom error message.
+        - If an exception occurs during file creation, it logs a custom error message.
     """
     
-    print("Next, we are creating run.bat file...")
+    global_error_handler("Creating run.bat file", "Now we're creating the run.bat file...")
 
     bat_file = os.path.join(cwd, "run.bat")
 
     if os.path.exists(bat_file):
         
-        print(f"run.bat file already exists in {cwd}")
+        global_error_handler("Creating run.bat file", f"run.bat file already exists in {cwd}")
         
         return bat_file
 
@@ -44,7 +47,7 @@ def create_bat_file(cwd: str) -> str | None:
 
         custom_message = f"{e.__class__.__name__} {e}"
 
-        print(custom_message)
+        global_error_handler("Creating run.bat file", custom_message)
 
         return None
 
@@ -58,16 +61,16 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
         None
     Notes:
         - If the '.env' file already exists, the function returns without making changes.
-        - If an exception occurs during file creation, it prints a custom error message.
+        - If an exception occurs during file creation, it logs a custom error message.
     """
 
-    print("Now we're creating .env file...")
+    global_error_handler("Creating .env file", "Now we're creating the .env file...")
 
     env_file = os.path.join(cwd, ".env")
 
     if os.path.exists(env_file):
         
-        print(f".env file already exists in {cwd}")
+        global_error_handler("Creating .env file", f".env file already exists in {cwd}")
         
         return env_file
 
@@ -77,7 +80,7 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
                         
             f.write("# Environment variables\n# These are mandatory for the application to run\n# Contact Support: hello@bluecitycapital.com\n\n")
 
-            print(f"Creating keys & values in {env_file}...")
+            global_error_handler("Creating .env file", f"Creating keys & values in {env_file}...")
             
             dynamic_constants = [
 
@@ -96,7 +99,7 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
                 
                 f.write(f"{key}='{value}'\n")
 
-            print(f".env file created in {cwd}")
+            global_error_handler("Creating .env file", f".env file created in {cwd}")
 
             return env_file
 
@@ -104,7 +107,7 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
 
         custom_message = f"{e.__class__.__name__} {e}"
 
-        print(custom_message)
+        global_error_handler("Creating .env file", custom_message)
 
         return None
     
@@ -121,6 +124,8 @@ def create_requirements_file(cwd:str) -> str | None:
         with open(dependancies_path, "w") as f:
 
             f.write(f"#If you need to manually install the dependencies, please refer to the following instructions:\n#1 Navigate to {cwd}\n#2 Activate .venv\n#3 Run the following command: pip install -r requirements.txt\n#Contact Support: hello@bluecitycapital.com\n")
+            f.write(f"#If you want to test without installing the dependencies, you can set the environment variable SKIP_DEPENDENCY_INSTALLATION to 'true' in your .env file.\n\n")
+            f.write("pip freeze > packages.txt && pip uninstall -r packages.txt -y\n")
             f.write("python-dotenv\n")
             f.write("requests\n")
 
@@ -140,7 +145,7 @@ def create_venv(cwd:str) -> str | None:
     Prints status messages for each subdirectory.
     """
             
-    print("First, we're creaing the Virtual Environment...")
+    global_error_handler("Creating Virtual Environment", "First, we're creating the Virtual Environment...")
     
     venv_path = os.path.join(cwd, ".venv")
 
@@ -152,7 +157,7 @@ def create_venv(cwd:str) -> str | None:
 
     if create_venv.returncode != 0:
         
-        print(f"Failed to create virtual environment in {cwd}. Error: {create_venv.stderr} {create_venv.returncode}")
+        global_error_handler("Creating Virtual Environment", f"Failed to create virtual environment in {cwd}. Error: {create_venv.stderr} {create_venv.returncode}")
         
         return None
                             
@@ -179,7 +184,7 @@ def create_env_files(cwd:str, root_directory:str, personal_access_token:str, org
 
             if result is None or result is False:
 
-                print(f"{fn.__name__} failed.")
+                global_error_handler("Creating Env Bundle", f"{fn.__name__} failed.")
                 
                 return False
             
@@ -187,7 +192,7 @@ def create_env_files(cwd:str, root_directory:str, personal_access_token:str, org
 
             return False
                
-        print("All files created successfully.")
+        global_error_handler("Creating Env Bundle", "All files created successfully.")
 
         return True
                 
@@ -195,6 +200,6 @@ def create_env_files(cwd:str, root_directory:str, personal_access_token:str, org
         
         custom_message =f"Error in creating env bundle {e}"
         
-        print(custom_message)
+        global_error_handler("Creating Env Bundle", custom_message)
 
         return False
