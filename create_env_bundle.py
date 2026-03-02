@@ -125,7 +125,7 @@ def create_requirements_file(cwd:str) -> str | None:
 
             f.write(f"#If you need to manually install the dependencies, please refer to the following instructions:\n#1 Navigate to {cwd}\n#2 Activate .venv\n#3 Run the following command: pip install -r requirements.txt\n#Contact Support: hello@bluecitycapital.com\n")
             f.write(f"#If you want to test without installing the dependencies, you can set the environment variable SKIP_DEPENDENCY_INSTALLATION to 'true' in your .env file.\n\n")
-            f.write("pip freeze > packages.txt && pip uninstall -r packages.txt -y\n")
+            f.write(f"#pip freeze > packages.txt && pip uninstall -r packages.txt -y\n")
             f.write("python-dotenv\n")
             f.write("requests\n")
 
