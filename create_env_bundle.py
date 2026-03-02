@@ -113,6 +113,8 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
     
 def create_requirements_file(cwd:str) -> str | None:
 
+    global_error_handler("Creating requirements.txt file", "Now we're creating the requirements.txt file...")
+    
     dependancies_path =  os.path.join(cwd, "requirements.txt")
 
     try:
