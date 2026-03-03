@@ -3,10 +3,11 @@ import subprocess
 import os
 from error_handler import global_error_handler
 import logging
+import settings
 
 logger = logging.getLogger(__name__) 
 
-def update_requirements(cwd: str, dependancy_filename: str = "requirements.txt") -> bool:
+def update_requirements(cwd: str, dependancy_filename: str = settings.requirements_txt_filename) -> bool:
     """
     Install and upgrade project dependencies from a requirements file using a local virtual environment.
     This function expects a virtual environment at ``<cwd>/.venv`` (Windows layout) and:
@@ -16,7 +17,7 @@ def update_requirements(cwd: str, dependancy_filename: str = "requirements.txt")
     Args:
         cwd (str): Project root directory containing the ``.venv`` folder and dependency file.
         dependancy_filename (str, optional): Name of the dependency file located in ``cwd``.
-            Defaults to ``"requirements.txt"``.
+            Defaults to ``settings.requirements_txt_filename``.
     Returns:
         bool: ``True`` if pip upgrade and dependency installation both complete successfully;
         otherwise ``False``.
