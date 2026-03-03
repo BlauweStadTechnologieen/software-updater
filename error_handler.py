@@ -27,7 +27,6 @@ def global_error_handler(subject:str, message:str, logging_level = logging.INFO)
 
     return None
 
-
 def missing_keys(dictionary:dict[str:str]):
     
     missing = []
