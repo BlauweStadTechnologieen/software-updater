@@ -447,7 +447,6 @@ def check_for_updates():
                             
     REPO_MAPPING = {
 
-        "software-updater"          : "software-updater",
         "mql5-script-manager"       : "github-push-script",
         "vm-status-monitor"         : "azure-vm-monitor",
 
