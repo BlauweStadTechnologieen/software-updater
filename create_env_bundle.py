@@ -59,7 +59,7 @@ def create_env(cwd: str, root_directory:str, personal_access_token:str, organiza
     Args:
         cwd (str): The current working directory where the '.env' file should be created.
     Returns:
-        None
+        str | None: Full path to '.env' file if it exists or is created successfully; otherwise `None` if an unexpected error occurs.
     Notes:
         - If the '.env' file already exists, the function returns without making changes.
         - If an exception occurs during file creation, it logs a custom error message.
@@ -191,6 +191,8 @@ def create_venv(cwd:str) -> str | None:
 
     if os.path.exists(venv_path) and os.listdir(venv_path):
                 
+        global_error_handler("Creating Virtual Environment", f"Virtual environment already exists in {cwd} at {venv_path}")
+        
         return venv_path
 
     create_venv = run_command(["python","-m", "venv", ".venv"], cwd)
