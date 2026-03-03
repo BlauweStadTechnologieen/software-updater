@@ -3,6 +3,7 @@ import subprocess
 from dotenv_constants import dotenv_constants
 from error_handler import global_error_handler
 import logging
+import settings
 
 logger = logging.getLogger(__name__)
 
@@ -130,21 +131,30 @@ def create_requirements_file(cwd:str) -> str | None:
         `global_error_handler`.
     """
     
-    global_error_handler("Creating requirements.txt file", "Now we're creating the requirements.txt file...")
+    global_error_handler("Creating the requirements.txt file", "Now we're creating the requirements.txt file...")
     
-    dependancies_path =  os.path.join(cwd, "requirements.txt")
+    dependancies_path =  os.path.join(cwd, settings.requirements_txt_filename)
 
     try:
+        
+        if os.path.exists(dependancies_path):
+            
+            # If the requirements.txt file already exists, we log this information and return the path without modifying it.
+            
+            global_error_handler("Creating the requirements.txt file", f"{settings.requirements_txt_filename} file already exists in {cwd}")
+            
+            return dependancies_path
+        
+        # If the requirements.txt file does not exist, we create it and write the necessary default dependencies.
         
         with open(dependancies_path, "w") as f:
 
             f.write(f"#Contact Support: hello@bluecitycapital.com\n")
             f.write(f"#If you want to test without installing the dependencies, you can set the environment variable SKIP_DEPENDENCY_INSTALLATION to 'true' in your .env file.\n\n")
             f.write(f"#pip freeze > packages.txt && pip uninstall -r packages.txt -y\n")
-            f.write("python-dotenv\n")
             f.write("requests\n")
 
-        global_error_handler("Successfully created requirements.txt file", f"requirements.txt file created in {cwd}")
+        global_error_handler("Creating the requirements.txt file", f"{settings.requirements_txt_filename} file successfully created in {cwd}")
         
         return dependancies_path
     
