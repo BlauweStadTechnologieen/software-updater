@@ -131,9 +131,9 @@ def create_requirements_file(cwd:str) -> str | None:
         `global_error_handler`.
     """
     
-    global_error_handler("Creating the requirements.txt file", "Now we're creating the requirements.txt file...")
-    
     dependancies_path =  os.path.join(cwd, settings.requirements_txt_filename)
+    
+    global_error_handler(f"Creating the {settings.requirements_txt_filename} file", f"Now we're creating the {settings.requirements_txt_filename} file in the {dependancies_path} directory...")
 
     try:
         
@@ -141,11 +141,13 @@ def create_requirements_file(cwd:str) -> str | None:
             
             # If the requirements.txt file already exists, we log this information and return the path without modifying it.
             
-            global_error_handler("Creating the requirements.txt file", f"{settings.requirements_txt_filename} file already exists in {cwd}")
+            global_error_handler(f"Creating the {settings.requirements_txt_filename} file", f"{settings.requirements_txt_filename} file already exists in {cwd} as {dependancies_path}")
             
             return dependancies_path
         
-        # If the requirements.txt file does not exist, we create it and write the necessary default dependencies.
+        ##########################################################################################################
+        # If the requirements.txt file does not exist, we create it and write the necessary default dependencies.#
+        ##########################################################################################################
         
         with open(dependancies_path, "w") as f:
 
@@ -153,23 +155,34 @@ def create_requirements_file(cwd:str) -> str | None:
             f.write(f"#If you want to test without installing the dependencies, you can set the environment variable SKIP_DEPENDENCY_INSTALLATION to 'true' in your .env file.\n\n")
             f.write(f"#pip freeze > packages.txt && pip uninstall -r packages.txt -y\n")
             f.write("requests\n")
+            f.write("python-dotenv\n")
 
-        global_error_handler("Creating the requirements.txt file", f"{settings.requirements_txt_filename} file successfully created in {cwd}")
+        global_error_handler(f"Creating the {settings.requirements_txt_filename} file", f"{settings.requirements_txt_filename} file successfully created in {cwd} as {dependancies_path}")
         
         return dependancies_path
     
     except Exception as e:
 
-        global_error_handler("Unexpected Error with creating a dependancy file", f"{e}")
+        global_error_handler(f"Unexpected Error with creating a {settings.requirements_txt_filename} file", f"{e}")
 
         return None
 
 def create_venv(cwd:str) -> str | None:
     """
-    Creates a Python virtual environment in each subdirectory of a specified base directory.
-    If a virtual environment already exists, it installs dependencies from requirements.txt if present.
-    Handles errors for missing base directory, missing subdirectories, and command failures.
-    Prints status messages for each subdirectory.
+    Creates a Python virtual environment in the specified directory.
+
+    Args:
+        cwd (str): The current working directory where the virtual environment will be created.
+    Returns:
+        str | None: The path to the virtual environment (.venv) if creation is successful or if it 
+                    already exists. Returns None if virtual environment creation fails.
+    Raises:
+        Handles errors internally and reports them via global_error_handler if venv creation fails.
+    Notes:
+        - If a virtual environment already exists and is not empty, returns the existing venv path.
+        - Creates a .venv directory in the specified working directory.
+        - Uses subprocess to execute 'python -m venv .venv' command.
+        - On failure, logs error message with stderr and return code.
     """
             
     global_error_handler("Creating Virtual Environment", "First, we're creating the Virtual Environment...")
